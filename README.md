@@ -17,10 +17,10 @@ Team 15-01: Moodify is a platform that connects users based on their spotify pla
 * NodeJS
 * PostgreSQL
 
-## Prerequisites
+### Prerequisites
 
-## How to Run
+### How to Run
 
-## How to Test
+### How to Test
 
-# Link to deployed application
+### Link to deployed application
