@@ -10,7 +10,7 @@ For Spotify users, who want new music suggestions . Moodify is a platform that c
 * Mario Hernandez
 * Yufan Qian
 * Renesh Panchal
-* Brooke
+* Brooke Dagne
 
 ## Tech Stack
 * JavaScript
