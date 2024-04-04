@@ -74,6 +74,16 @@ app.use(
 
 // -----------ROUTES---------------------
 
+//for test purposes
+app.get('/welcome', (req, res) => {
+  res.json({status: 'success', message: 'Welcome!'});
+});
+
+
+
+
+
+
 app.get('/', (req, res) => {
   res.redirect('/login'); //this will call the /anotherRoute route in the API
 });
@@ -82,9 +92,9 @@ app.get('/login', (req,res)=>{
   res.render('pages/login');
 });
 
-
-console.log('Listening on 3000');
-app.listen(3000);
+module.exports = app.listen(3000);
+// console.log('Listening on 3000');
+// app.listen(3000);
 
 
 
