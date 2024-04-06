@@ -1,13 +1,12 @@
 
-//console.log("Hello world!")
 
 
 // ----------------------------------   DEPENDENCIES  ----------------------------------------------
 const pgp = require('pg-promise')() // To connect to the Postgres DB from the node server
-var request = require('request');
-var cors = require('cors');
-var querystring = require('querystring');
-var cookieParser = require('cookie-parser');
+// var request = require('request');
+// var cors = require('cors');
+// var querystring = require('querystring');
+// var cookieParser = require('cookie-parser');
 
 
 const express = require('express'); // To build an application server or API
@@ -74,6 +73,8 @@ app.use(
 
 // -----------ROUTES---------------------
 
+
+
 //for test purposes
 app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});
@@ -84,13 +85,13 @@ app.get('/welcome', (req, res) => {
 
 
 
-app.get('/', (req, res) => {
-  res.redirect('/login'); //this will call the /anotherRoute route in the API
-});
+// app.get('/', (req, res) => {
+//   res.redirect('/login'); //this will call the /anotherRoute route in the API
+// });
 
-app.get('/login', (req,res)=>{
-  res.render('pages/login');
-});
+// app.get('/login', (req,res)=>{
+//   res.render('pages/login');
+// });
 
 module.exports = app.listen(3000);
 // console.log('Listening on 3000');
