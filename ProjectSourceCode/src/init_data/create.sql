@@ -18,5 +18,27 @@ create table if not exists playlist_mood(
     mood5 int not null
 );
 
+create table if not exists moods(
+    mood_id serial primary key,
+    mood_name varchar(50) not null
+);
+
+create table if not exists track(
+    track_id serial primary key,
+    playlist_id int references playlists(playlist_id),
+    user_id int references users(id),
+    mood_id int references moods(mood_id)
+
+);
+
+create table if not exists genre(
+    genre_id serial primary key,
+    genre_name varchar(50) not null
+);
+
+
+
+
+
 
 
