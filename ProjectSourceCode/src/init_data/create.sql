@@ -36,10 +36,9 @@ create table if not exists genre(
     genre_name varchar(50) not null
 );
 
---spotify genres table
-create table if not exists spotigenres(
-    spot_id int references genre(genre_id),
-    sopt_name varchat(50) references genre(genre_id)
+create table if not exists mood_to_genre(
+    genre_id references moods(mood_id),
+    genre_name references moods(genre_name)
 );
 
 
