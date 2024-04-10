@@ -36,7 +36,10 @@ create table if not exists genre(
     genre_name varchar(50) not null
 );
 
-
+create table if not exists spotigenres(
+    spot_id int references genre(genre_id),
+    sopt_name varchat(50) references genre(genre_id)
+);
 
 
 
