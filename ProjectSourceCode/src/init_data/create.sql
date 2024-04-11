@@ -36,7 +36,10 @@ create table if not exists genre(
     genre_name varchar(50) not null
 );
 
-
+create table if not exists mood_to_genre(
+    genre_id references moods(mood_id),
+    genre_name references moods(genre_name)
+);
 
 
 
