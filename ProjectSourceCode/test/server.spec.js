@@ -64,28 +64,28 @@ describe('Testing Redirect', () => {
 // Explanation: The testcase will call the /add_user API with the following input
 // and expects the API to return a status of 200 along with the "Success" message.
 
-describe('Testing Add User API', () => {
-  it('positive : /add_user', done => {
-    chai
-      .request(server)
-      .post('/add_user')
-      .send({spotifyuser: "harikakondur", password:"harika"})
-      .end((err, res) => {
-        expect(res).to.have.status(200);
-        expect(res.body.message).to.equals('Success');
-        done();
-      });
-  });
+// describe('Testing Add User API', () => {
+//   it('positive : /add_user', done => {
+//     chai
+//       .request(server)
+//       .post('/add_user')
+//       .send({spotifyuser: "harikakondur", password:"harika"})
+//       .end((err, res) => {
+//         expect(res).to.have.status(200);
+//         expect(res.body.message).to.equals('Success');
+//         done();
+//       });
+//   });
   
-  it('Negative : /add_user. Checking empty password', done => {
-    chai
-      .request(server)
-      .post('/add_user')
-      .send({spotifyuser: "harikakondur"})
-      .end((err, res) => {
-        expect(res).to.have.status(400);
-        expect(res.body.message).to.equals('Invalid input');
-        done();
-      });
-  });
-});
+//   it('Negative : /add_user. Checking empty password', done => {
+//     chai
+//       .request(server)
+//       .post('/add_user')
+//       .send({spotifyuser: "harikakondur"})
+//       .end((err, res) => {
+//         expect(res).to.have.status(400);
+//         expect(res.body.message).to.equals('Invalid input');
+//         done();
+//       });
+//   });
+// });

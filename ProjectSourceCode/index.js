@@ -136,32 +136,33 @@ app.post('/register', async (req, res) => {
   let query = 'insert into users (spotifyuser,password) values ($1,$2) returning *';
   let response = await db.any(query,[spotifyUsername,hash]);
 
-  db.one(query, [spotifyuser, password])
+  db.one(query, [spotifyUsername, hash])
   .then(user => {
     console.log(user);
-    res.redirect('/register');
+    res.redirect('/home');
   })
   .catch(error => {
     console.error('ERROR:', error);
+    console.log(error);
     res.redirect('/login');
   });
 });
 
-app.post('/add_user', async (req, res) => {
-  const hash = await bcrypt.hash(req.body.password, 10);
-  const spotifyUsername = req.body.spotifyUsername;
-  console.log(spotifyUsername, " in post")
-  let query = 'insert into users (spotifyuser,password) values ($1,$2) returning *';
-  let response = await db.any(query,[spotifyUsername,hash]);
+// app.post('/add_user', async (req, res) => {
+//   const hash = await bcrypt.hash(req.body.password, 10);
+//   const spotifyUsername = req.body.spotifyUsername;
+//   console.log(spotifyUsername, " in post")
+//   let query = 'insert into users (spotifyuser,password) values ($1,$2) returning *';
+//   let response = await db.any(query,[spotifyUsername,hash]);
 
-  db.one(query, [spotifyuser, password])
-  .then(user => {
-    console.log(user);
-  })
-  .catch(error => {
-    console.error('ERROR:', error);
-  });
-});
+//   db.one(query, [spotifyuser, password])
+//   .then(user => {
+//     console.log(user);
+//   })
+//   .catch(error => {
+//     console.error('ERROR:', error);
+//   });
+// });
 
 
 module.exports = app.listen(3000);

@@ -1,7 +1,7 @@
 create table if not exists users(
     id serial primary key,
     spotifyuser varchar(50) not null,
-    password char(60) not null
+    password varchar(60) not null
 );
 
 create table if not exists playlists(
@@ -36,10 +36,10 @@ create table if not exists genre(
     genre_name varchar(50) not null
 );
 
-create table if not exists mood_to_genre(
-    genre_id references moods(mood_id),
-    genre_name references moods(genre_name)
-);
+-- create table if not exists mood_to_genre(
+--     genre_id references moods(mood_id),
+--     genre_name references moods(genre_name)
+-- );
 
 
 
