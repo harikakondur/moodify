@@ -5,9 +5,36 @@ Meeting Logs:
 
 
 Week 1:
+Created a wireframe
+Created a github repository
+Created epics/user stories on github
+Discussed the project time frame
+Discussed what features we want in the website
+Discussed what functions we need to create in order to generate mood and users
+Briefly discussed what general roles each of us will be responsible for in the project
+Agreed to all look through and review the spotify API during spring break in order to have a better idea of how we will implement them to create the website
 
 Week 2:
+Plan:
+Setup vision
+Assign all of the features of our application
+Login / register link user id to spotify
+Separate the register if you already have a spotify account
+Weekly lab - comment out all API
+Docker html - check with postman and run the application
 
 Week 3:
+Got done this week:
+Finished login register page 
+Worked on function to take in API user data
+Created SQL tables 
+Set up repository and spotify authorization and routes to login to page
+
+To do for next week:
+Write the routes to get function such as get playlists
+Create playlists page with cards and carousel 
+Turn pseudo code into code for functions
+Creating functions to match data to tables 
+
 
 Week 4:
