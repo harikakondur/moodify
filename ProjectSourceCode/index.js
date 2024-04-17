@@ -1,5 +1,6 @@
 
-
+//functions
+const insertPlaylists = require('./src/resources/js/script.js');
 
 // ----------------------------------   DEPENDENCIES  ----------------------------------------------
 const pgp = require('pg-promise')() // To connect to the Postgres DB from the node server
@@ -28,8 +29,20 @@ const dbConfig = {
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD
 };
-const db = pgp(dbConfig);
 
+
+
+
+const prodDbConfig = {
+  host: process.env.host,
+  port: 5432,
+  database: process.env.POSTGRES_DB,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD
+};
+
+
+const db = pgp(dbConfig);  //dbconfig
 // db test
 db.connect()
   .then(obj => {
@@ -70,11 +83,17 @@ app.use(
   })
 );
 
+app.use(express.static(__dirname + '/public'));
+//app.use('/resources', express.static(path.join(__dirname, 'resources')));
+
+const tokens = {
+  access:undefined,
+  refresh:undefined,
+  username: undefined
+}
 
 
 // -----------ROUTES---------------------
-
-
 
 //for test purposes
 app.get('/welcome', (req, res) => {
@@ -86,7 +105,6 @@ app.get('/', (req,res)=>{
 });
 
 app.get('/login', (req,res)=>{
-  // res.send(302);
   res.render('pages/login');
 });
 
@@ -102,33 +120,38 @@ app.get('/home', (req,res)=>{
 //POST login api
 app.post('/login', async(req,res)=>{
     try {
+      console.log("in /login")
         const username = req.body.username;
         const password = req.body.password;
-        const query= `select * from users where spotifyUsername='${username}';`;
+        const query= `select * from users where spotifyuser='${username}';`;
         let user= await db.any(query);
         //console.log(user);
-
-
         if(user.length!=0){
             // check if password from request matches with password in DB
             const match = await bcrypt.compare(req.body.password, user[0].password);
-            if(match.err){
-                throw new Error("Incorrect username or password");
-            }else{
-                req.session.user = user;
+            if(match){
+              req.session.user = {client_id: process.env.CLIENT_ID};
                 req.session.save();
-                res.redirect('/home');
+                //save username
+                tokens.username=username
+                res.redirect('/home')
+              
+            }else{
+              console.log("incorrect user/password")
+              res.render('pages/login', {message: "Incorrect Username or Password."});
             }
         }else{
-            res.redirect('/register');
+          res.render('pages/login', {message: "User does not exist. Please register."});
         }
     } catch(error) {
         res.render('pages/login', {message:error});
     }
 });
 
-app.use(express.urlencoded({ extended: true }));
+//app.use(express.urlencoded({ extended: true }));
 // POST Register
+
+
 app.post('/register', async (req, res) => {
   const hash = await bcrypt.hash(req.body.password, 10);
   const spotifyUsername = req.body.spotifyUsername;
@@ -138,8 +161,8 @@ app.post('/register', async (req, res) => {
 
   db.one(query, [spotifyUsername, hash])
   .then(user => {
-    console.log(user);
-    res.redirect('/home');
+    console.log("inserted user", user);
+    res.redirect('/login');
   })
   .catch(error => {
     console.error('ERROR:', error);
@@ -148,21 +171,39 @@ app.post('/register', async (req, res) => {
   });
 });
 
-// app.post('/add_user', async (req, res) => {
-//   const hash = await bcrypt.hash(req.body.password, 10);
-//   const spotifyUsername = req.body.spotifyUsername;
-//   console.log(spotifyUsername, " in post")
-//   let query = 'insert into users (spotifyuser,password) values ($1,$2) returning *';
-//   let response = await db.any(query,[spotifyUsername,hash]);
+app.get('/playlistsHomePage', (req, res) => {
+  console.log("in /playlists homepage")
+  const { username } = tokens.username
+  db.query(`SELECT * FROM playlists WHERE playlist_owner='${username}'`, (err, result) => {
+      if (err) {
+          res.redirect('/error');
+      } else {
+        res.render('home', { playlists: result.rows });
+      }
+  });
+});
 
-//   db.one(query, [spotifyuser, password])
-//   .then(user => {
-//     console.log(user);
-//   })
-//   .catch(error => {
-//     console.error('ERROR:', error);
-//   });
-// });
+
+
+app.get('/get_playlists', async (req,res)=>{
+  console.log("in /get_playlists")
+  console.log("userrr:",tokens.username)
+  const tokenp = "Bearer " + tokens.access;
+  const playlistUrl= `https://api.spotify.com/v1/users/${tokens.username}/playlists?limit=3`
+  axios.get(playlistUrl,{
+    headers: {
+      'Authorization': tokenp
+    }})
+    .then(results => {
+      insertPlaylists(results,tokens.username);
+      res.redirect('/playlistsHomePage');
+    })
+    .catch(error => {
+      console.log("ERRORRRR")
+      console.log(error);
+    });
+});
+
 
 
 module.exports = app.listen(3000);
@@ -262,6 +303,10 @@ app.get('/callback', function(req, res) {
         var access_token = body.access_token,
             refresh_token = body.refresh_token;
 
+        //updating tokens to use for other routes
+        tokens.access = access_token;
+        tokens.refresh = refresh_token;
+        
         var options = {
           url: 'https://api.spotify.com/v1/me',
           headers: { 'Authorization': 'Bearer ' + access_token },
@@ -271,6 +316,8 @@ app.get('/callback', function(req, res) {
         // use the access token to access the Spotify Web API
         request.get(options, function(error, response, body) {
           const spotifyUsername=body.id //fetch the spotify username
+          tokens.username=body.id //save for later
+          console.log("updated username token: ",tokens.username)
           res.render('pages/register',{spotifyUsername:spotifyUsername})
           console.log(body.id);
         });
@@ -311,6 +358,11 @@ app.get('/refresh_token', function(req, res) {
     if (!error && response.statusCode === 200) {
       var access_token = body.access_token,
           refresh_token = body.refresh_token;
+      
+      //updating tokens to use for other routes
+      tokens.access = access_token;
+      tokens.refresh = refresh_token;
+      
       res.send({
         'access_token': access_token,
         'refresh_token': refresh_token

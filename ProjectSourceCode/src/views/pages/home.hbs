@@ -1,2 +1,22 @@
 
-<h1>home page</h1>
+
+<h2>home page</h2>
+<div class="container">
+        <div class="row">
+            {{#each playlists}}
+                <div class="col-sm-4">
+                    <div class="card">
+                        <img src="{{this.playlist_img}}" class="card-img-top" alt="Playlist Image">
+                        <div class="card-body">
+                            <h5 class="card-title">{{this.playlist_name}}</h5>
+                            <p class="card-text">Owner: {{this.playlist_owner}}</p>
+                            <a href="/playlists/{{this.playlist_id}}" class="btn btn-primary">Go to Playlist</a>
+                        </div>
+                    </div>
+                </div>
+                {{#if @last}}
+                    </div><div class="row">
+                {{/if}}
+            {{/each}}
+        </div>
+    </div>
