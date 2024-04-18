@@ -1,6 +1,6 @@
 
 //functions
-const insertPlaylists = require('./src/resources/js/script.js');
+//const insertPlaylists = require('./src/resources/js/script.js');
 
 // ----------------------------------   DEPENDENCIES  ----------------------------------------------
 const pgp = require('pg-promise')() // To connect to the Postgres DB from the node server
@@ -91,7 +91,35 @@ const tokens = {
   refresh:undefined,
   username: undefined
 }
+//functions -----------------------------
+async function insertPlaylists(playlistJson,username){
+  console.log("Inside insertPlaylists()")
+    var playlistCount= playlistJson.limit
 
+    for (i=0;i<playlistCount;i++){
+        var id=playlistJson.items[i].id
+        var name=playlistJson.items[i].name
+        var img=playlistJson.items[i].images[0].url
+        var mood
+        let insert = `
+    INSERT INTO playlists(playlist_id, playlist_owner, playlist_name, playlist_img)
+    SELECT '${id}', '${username}', '${name}', '${img}'
+    WHERE NOT EXISTS (
+        SELECT 1 FROM playlists WHERE playlist_id='${id}'
+    )
+`;
+        //let insert=`insert into playlists(playlist_id,playlist_owner,playlist_name,playlist_img) values('${id}', '${username}', '${name}', '${img}') where not exists (select playlist_id from playlists where playlistid='${id}')`
+        console.log("INSERTING ",insert)
+        // execute the insert query here
+        db.query(insert, (err, res) => {
+            if (err) {
+              console.log(err.stack)
+            } else {
+              console.log(res.rows[0])
+            }
+          })
+    }
+}
 
 // -----------ROUTES---------------------
 
@@ -134,7 +162,7 @@ app.post('/login', async(req,res)=>{
                 req.session.save();
                 //save username
                 tokens.username=username
-                res.redirect('/home')
+                res.redirect('/spotify_auth_login')
                 console.log
             }else{
               console.log("incorrect user/password")
@@ -183,16 +211,18 @@ app.post('/register', async (req, res) => {
     });
 });
 
-app.get('/playlistsHomePage', (req, res) => {
+app.get('/playlistsHomePage', async (req, res) => {
   console.log("in /playlists homepage")
   console.log("/playlisy home page username: ",tokens.username)
-  const { username } = tokens.username
-  db.query(`SELECT * FROM playlists WHERE playlist_owner='${username}'`, (err, result) => {
-      if (err) {
-          res.redirect('/error');
-      } else {
-        res.render('home', { playlists: result.rows });
-      }
+  const  usern  = tokens.username
+  
+  const q = await db.query(`SELECT * FROM playlists WHERE playlist_owner='${usern}'`)
+  .then(result => {
+    console.log('success?')
+    console.log("ROWS: ",result)
+    res.render('pages/home', { playlists: result });
+  }).catch(err => {
+    console.log(err)
   });
 });
 
@@ -202,7 +232,7 @@ app.get('/get_playlists', async (req,res)=>{
   console.log("in /get_playlists")
   console.log("   user:",tokens.username)
   const tokenp = "Bearer " + tokens.access;
-  const playlistUrl= `https://api.spotify.com/v1/users/${tokens.username}/playlists?limit=3`
+  const playlistUrl= `https://api.spotify.com/v1/users/${tokens.username}/playlists?limit=6`
   axios.get(playlistUrl,{
     headers: {
       'Authorization': tokenp
