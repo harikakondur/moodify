@@ -1,4 +1,5 @@
 function insertPlaylists(playlistJson,username){
+  console.log("Inside insertPlaylists()")
     var playlistCount= playlistJson.limit
 
     for (i=0;i<playlistCount;i++){
@@ -7,7 +8,7 @@ function insertPlaylists(playlistJson,username){
         var img=playlistJson.items[i].images[0].url
         var mood
         let insert=`insert into playlists(playlist_id,playlist_owner,playlist_name,playlist_img) values('${id}', '${username}', '${name}', '${img}')`
-        console.log(insert)
+        console.log("INSERTING ",insert)
         // execute the insert query here
         db.query(insert, (err, res) => {
             if (err) {
