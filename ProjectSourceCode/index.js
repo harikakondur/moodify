@@ -135,7 +135,7 @@ app.post('/login', async(req,res)=>{
                 //save username
                 tokens.username=username
                 res.redirect('/home')
-              
+                console.log
             }else{
               console.log("incorrect user/password")
               res.render('pages/login', {message: "Incorrect Username or Password."});
@@ -148,31 +148,44 @@ app.post('/login', async(req,res)=>{
     }
 });
 
-//app.use(express.urlencoded({ extended: true }));
 // POST Register
-
-
 app.post('/register', async (req, res) => {
   const hash = await bcrypt.hash(req.body.password, 10);
   const spotifyUsername = req.body.spotifyUsername;
   console.log(spotifyUsername, " in post")
   let query = 'insert into users (spotifyuser,password) values ($1,$2) returning *';
-  let response = await db.any(query,[spotifyUsername,hash]);
+  let checkExists = `select * from users where spotifyuser=$1`;
 
-  db.one(query, [spotifyUsername, hash])
-  .then(user => {
-    console.log("inserted user", user);
-    res.redirect('/login');
-  })
-  .catch(error => {
-    console.error('ERROR:', error);
-    console.log(error);
-    res.redirect('/login');
-  });
+  // Check if user already exists
+  db.oneOrNone(checkExists, [spotifyUsername])
+    .then(user => {
+      if (user) {
+        // User already exists, redirect to login
+        res.render('pages/login',{message:"Account already exists, please login"});
+      } else {
+        // User doesn't exist, proceed with registration
+        db.one(query, [spotifyUsername, hash])
+          .then(user => {
+            console.log("inserted user", user);
+            res.redirect('/login');
+          })
+          .catch(error => {
+            console.error('ERROR:', error);
+            console.log(error);
+            res.redirect('/login');
+          });
+      }
+    })
+    .catch(error => {
+      console.error('ERROR:', error);
+      console.log(error);
+      res.redirect('/login');
+    });
 });
 
 app.get('/playlistsHomePage', (req, res) => {
   console.log("in /playlists homepage")
+  console.log("/playlisy home page username: ",tokens.username)
   const { username } = tokens.username
   db.query(`SELECT * FROM playlists WHERE playlist_owner='${username}'`, (err, result) => {
       if (err) {
@@ -187,7 +200,7 @@ app.get('/playlistsHomePage', (req, res) => {
 
 app.get('/get_playlists', async (req,res)=>{
   console.log("in /get_playlists")
-  console.log("userrr:",tokens.username)
+  console.log("   user:",tokens.username)
   const tokenp = "Bearer " + tokens.access;
   const playlistUrl= `https://api.spotify.com/v1/users/${tokens.username}/playlists?limit=3`
   axios.get(playlistUrl,{
@@ -195,7 +208,9 @@ app.get('/get_playlists', async (req,res)=>{
       'Authorization': tokenp
     }})
     .then(results => {
-      insertPlaylists(results,tokens.username);
+      console.log("RESULTS",results.data)
+      console.log("get_playlists usernmae",tokens.username)
+      insertPlaylists(results.data,tokens.username);
       res.redirect('/playlistsHomePage');
     })
     .catch(error => {
@@ -205,7 +220,9 @@ app.get('/get_playlists', async (req,res)=>{
 });
 
 
-
+app.get('/logout',(req,res)=>{
+  res.render('pages/login',{message:"Logged out Successfully."});
+});
 module.exports = app.listen(3000);
 // console.log('Listening on 3000');
 // app.listen(3000);
@@ -306,6 +323,7 @@ app.get('/callback', function(req, res) {
         //updating tokens to use for other routes
         tokens.access = access_token;
         tokens.refresh = refresh_token;
+        console.log("Updated tokens after auth:",tokens.access)
         
         var options = {
           url: 'https://api.spotify.com/v1/me',
@@ -371,5 +389,129 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
-// console.log('Listening on 3000');
-// app.listen(3000);
+
+
+// Spotify Auth for login
+
+app.get('/spotify_auth_login', function(req, res) {
+
+  var state = generateRandomString(16);
+  res.cookie(stateKey, state);
+
+  // your application requests authorization
+  var scope = 'user-read-private user-read-email';
+  res.redirect('https://accounts.spotify.com/authorize?' +
+    querystring.stringify({
+      response_type: 'code',
+      client_id: client_id,
+      scope: scope,
+      redirect_uri: 'http://localhost:3000/callback_login',
+      state: state
+    }));
+});
+
+
+app.get('/callback_login', function(req, res) {
+
+  // your application requests refresh and access tokens
+  // after checking the state parameter
+
+  var code = req.query.code || null;
+  var state = req.query.state || null;
+  var storedState = req.cookies ? req.cookies[stateKey] : null;
+
+  if (state === null || state !== storedState) {
+    res.redirect('/#' +
+      querystring.stringify({
+        error: 'state_mismatch'
+      }));
+  } else {
+    res.clearCookie(stateKey);
+    var authOptions = {
+      url: 'https://accounts.spotify.com/api/token',
+      form: {
+        code: code,
+        redirect_uri: 'http://localhost:3000/callback_login',
+        grant_type: 'authorization_code'
+      },
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        Authorization: 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64'))
+      },
+      json: true
+    };
+
+    request.post(authOptions, function(error, response, body) {
+      if (!error && response.statusCode === 200) {
+
+        var access_token = body.access_token,
+            refresh_token = body.refresh_token;
+
+        //updating tokens to use for other routes
+        tokens.access = access_token;
+        tokens.refresh = refresh_token;
+        console.log("updating login access token:",tokens.access)
+        var options = {
+          url: 'https://api.spotify.com/v1/me',
+          headers: { 'Authorization': 'Bearer ' + access_token },
+          json: true
+        };
+
+        // use the access token to access the Spotify Web API
+        request.get(options, function(error, response, body) {
+          const spotifyUsername=body.id //fetch the spotify username
+          tokens.username=body.id //save for later
+          console.log("updated username token: ",tokens.username)
+          res.redirect('/get_playlists');
+          //res.redirect('/get_playlists',{spotifyUsername:spotifyUsername})
+          console.log(body.id);
+        });
+
+        // we can also pass the token to the browser to make requests from there
+        // res.redirect('/home')
+        //   console.log(querystring.stringify({
+        //     access_token: access_token,
+        //     refresh_token: refresh_token
+        //   }))
+      } else {
+        res.redirect('/#' +
+          querystring.stringify({
+            error: 'invalid_token'
+          }));
+      }
+    });
+  }
+});
+
+app.get('/refresh_token', function(req, res) {
+
+  var refresh_token = req.query.refresh_token;
+  var authOptions = {
+    url: 'https://accounts.spotify.com/api/token',
+    headers: { 
+      'content-type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64')) 
+    },
+    form: {
+      grant_type: 'refresh_token',
+      refresh_token: refresh_token
+    },
+    json: true
+   };
+
+  request.post(authOptions, function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+      var access_token = body.access_token,
+          refresh_token = body.refresh_token;
+      
+      //updating tokens to use for other routes
+      tokens.access = access_token;
+      tokens.refresh = refresh_token;
+      
+      res.send({
+        'access_token': access_token,
+        'refresh_token': refresh_token
+      });
+    }
+  });
+});
