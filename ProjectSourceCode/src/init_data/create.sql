@@ -5,10 +5,10 @@ create table if not exists users(
 );
 
 create table if not exists playlists(
-    playlist_id serial primary key,
+    playlist_id varchar(50) primary key,
     playlist_owner varchar(50) references users(spotifyuser),
     playlist_name varchar(50),
-    playlist_img varchar(150),
+    playlist_img varchar(250),
     mood_id varchar(50),
     valence float,
     energy float,
@@ -32,7 +32,7 @@ create table if not exists moods(
 
 create table if not exists track(
     track_id serial primary key,
-    playlist_id int references playlists(playlist_id),
+    playlist_id varchar(50) references playlists(playlist_id),
     user_id int references users(id),
     valence float,
     energy float,
