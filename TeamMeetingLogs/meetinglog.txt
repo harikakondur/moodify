@@ -38,3 +38,22 @@ Creating functions to match data to tables
 
 
 Week 4:
+Got done this week:
+Finished the authorization and flow for login.
+Completed backend for showing playlists on playlist page.
+Finished function to determine the mood for users. 
+Made changes to the powerpoint.
+
+To do for next week:
+We also made progress on the playlist page and will work on finishing the design. 
+Finsih making tickets with descriptions. 
+Finishing partials and style designs for user page 
+Planning on connecting spotify to our database.
+Finishing the functions for boosters for the mood and creating the API for that. 
+Currently completing the presentation
+
+
+
+Valence
+Energy 
+Dancebilty
