@@ -99,6 +99,7 @@ async function insertPlaylists(playlistJson,username){
       console.log(playlistJson.items[i])
         var id=playlistJson.items[i].id
         var name=playlistJson.items[i].name
+        var total = playlistJson.items[i].tracks.total;
         console.log("playlistJson.items[i].images",playlistJson.items[i].images)
         if(playlistJson.items[i].images!=null){
           var img=playlistJson.items[i].images[0].url
