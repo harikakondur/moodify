@@ -1,27 +1,24 @@
 
+{{> navbar isLoggedIn=true }}
 
-<h2>home page</h2>
-<div class="nav-item me-1">
-         <!-- TODO: For Logout, add a <a> tag with an attribute href to call the '/logout API -->
-            <a href="/logout" class="nav-link">Logout</a>
-       </div>
-<div class="container">
-        <div class="row">
-            {{#each playlists}}
-                <div class="col-sm-4">
-                    <div class="card">
-                        <img src="{{this.playlist_img}}" class="card-img-top" alt="Playlist Image">
-                        <div class="card-body">
-                            <h5 class="card-title">{{this.playlist_name}}</h5>
-                            <p class="card-text">Owner: {{this.playlist_owner}}</p>
-                            {{!-- <a href="/playlists/{{this.playlist_id}}" class="btn btn-primary">Go to Playlist</a> --}}
-                            <a href="/view_mood/{{this.playlist_id}}" class="btn btn-secondary">View Mood</a>
-                        </div>
+<!-- Content for the home page -->
+
+<div class="container-home">
+    <div class="row g-3"> <!-- g-3 for spacing between columns -->
+        {{#each playlists}}
+        <div class="col-md-4">
+            <div class="card h-100"> <!-- h-100 for equal height cards -->
+                <img src="{{this.playlist_img}}" class="card-img-top" alt="Playlist Image">
+                <div class="card-body">
+                    <h5 class="card-title">{{this.playlist_name}}</h5>
+                    <p class="card-text">Owner: {{this.playlist_owner}}</p>
+                    <div class="d-grid gap-2 d-md-block"> <!-- Button grid for equal spacing -->
+                        <button class="btn btn-secondary" onclick="location.href='/view-mood/{{this.playlist_id}}'">View Mood</button>
+                        <button class="btn btn-success" onclick="location.href='/find-matches/{{this.playlist_id}}'">Find Matches -></button>
                     </div>
                 </div>
-                {{#if @last}}
-                    </div><div class="row">
-                {{/if}}
-            {{/each}}
+            </div>
         </div>
+        {{/each}}
     </div>
+</div>
