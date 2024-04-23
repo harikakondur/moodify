@@ -106,7 +106,6 @@ async function insertPlaylists(playlistJson,username){
         else{
           var img = "/images/default_img.png"
         }
-        var mood
         let insert = `
     INSERT INTO playlists(playlist_id, playlist_owner, playlist_name, playlist_img,track_count)
     SELECT '${id}', '${username}', '${name}', '${img}','${total}'
