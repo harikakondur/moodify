@@ -678,3 +678,18 @@ app.get('/refresh_token', function(req, res) {
     }
   });
 });
+
+
+
+
+app.get('/login', (req, res) => {
+  res.render('login', { isLoggedIn: false });
+});
+
+app.get('/home', (req, res) => {
+  if(req.session.user) { // Assuming session middleware is used for login state
+    res.render('home', { isLoggedIn: true });
+  } else {
+    res.redirect('/login');
+  }
+});
