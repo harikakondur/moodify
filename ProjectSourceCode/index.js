@@ -116,16 +116,52 @@ async function insertPlaylists(playlistJson,username){
     }
 }
 
+// async function fetchGenres(playlistJson,total){
+//   console.log("inside fetchGenres")
+//   var allGenres = {} //this will collect all the genres (genre:count)
+
+//   //parsing through each track
+//   for (let i = 0; i < total; i++){
+
+//     var artistSongUrl = playlistJson.tracks.items[i].track.album.artists[0].href //artist endpoint
+    
+//     axios.get(artistSongUrl, {
+//       headers: {
+//         'Authorization': "Bearer " + tokens.access
+//       }
+//     })
+//     .then(result => {
+//       var artistGenres = result.data.genres //artist genres
+//       console.log("artistgenres:",artistGenres)
+//       // Add genres to allGenres
+//       artistGenres.forEach(genre => {
+//         if (allGenres[genre]) { 
+//           allGenres[genre]++
+//         } else {
+//           allGenres[genre] = 1
+//         }  
+//       });
+
+//     }).catch(err => {
+//       console.log("fetching artist genre error: ",err)
+//     });
+//   }
+//   console.log("allgenres after fetching",allGenres)
+//   return allGenres
+  
+// }
+
 async function fetchGenres(playlistJson,total){
   console.log("inside fetchGenres")
   var allGenres = {} //this will collect all the genres (genre:count)
+  var promises = []; // this will collect all the promises
 
   //parsing through each track
   for (let i = 0; i < total; i++){
 
     var artistSongUrl = playlistJson.tracks.items[i].track.album.artists[0].href //artist endpoint
     
-    axios.get(artistSongUrl, {
+    var promise = axios.get(artistSongUrl, {
       headers: {
         'Authorization': "Bearer " + tokens.access
       }
@@ -145,10 +181,13 @@ async function fetchGenres(playlistJson,total){
     }).catch(err => {
       console.log("fetching artist genre error: ",err)
     });
+
+    promises.push(promise);
   }
-  console.log("allgenres after fetching",allGenres)
+
+  await Promise.all(promises);
+  //console.log("allgenres after fetching",allGenres)
   return allGenres
-  
 }
 
 // -----------ROUTES---------------------
@@ -292,12 +331,32 @@ app.get('/view_mood/:id', async (req, res) => {
       'Authorization': "Bearer " + tokens.access
     }
   })
-  .then(results => {
+  .then(async results => {
     console.log("PLAYLIST: ",results.data)
     var total=results.data.tracks.total
-    var genreArray = fetchGenres(results.data,total);
+    var allGenres = await fetchGenres(results.data,total);
+    // Convert allGenres object to array of objects
+    var genreArray = Object.keys(allGenres).map(genre => {
+      return { genre: genre, count: allGenres[genre] };
+    });
+    console.log("GENRE ARRAY",genreArray)
+    // Sort genreArray by count in descending order and take the first three genres
+    var topGenres = genreArray.sort((a, b) => b.count - a.count).slice(0, 3);
+
+    console.log("TOP GENRES", topGenres)
+
+    // Insert top genres into playlists table
+    var query = `UPDATE playlists SET genre1='${topGenres[0].genre}', genre2='${topGenres[1].genre}', genre3='${topGenres[2].genre}' WHERE playlist_id='${pid}'`;
+    db.query(query, (error, results) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.log("Genres inserted successfully");
+      }
+    });
 
     res.render('pages/genres', { genres: genreArray });
+  })
     //var valence,dance,energy=generateMetrics(results);
     //var mood = generateMood(genreArray);
     // You may want to do something with 'mood' here, like sending it in the response
@@ -309,7 +368,6 @@ app.get('/view_mood/:id', async (req, res) => {
     //   console.log("cannot fetch playlist err: ",err)
     // });
     
-  })
   .catch(error => {
     console.error(error);
   });

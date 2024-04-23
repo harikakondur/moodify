@@ -1,7 +1,9 @@
 create table if not exists users(
     id serial primary key,
     spotifyuser varchar(50) unique,
-    password varchar(60) not null
+    password varchar(60) not null,
+    profile_pic varchar(150),
+    followers int
 );
 
 create table if not exists playlists(
@@ -13,7 +15,10 @@ create table if not exists playlists(
     valence float,
     energy float,
     dancebility float,
-    track_count int
+    track_count int,
+    genre1 varchar(30),
+    genre2 varchar(30),
+    genre3 varchar(30)
 
 );
 
