@@ -14,7 +14,8 @@
                         <div class="card-body">
                             <h5 class="card-title">{{this.playlist_name}}</h5>
                             <p class="card-text">Owner: {{this.playlist_owner}}</p>
-                            <a href="/playlists/{{this.playlist_id}}" class="btn btn-primary">Go to Playlist</a>
+                            {{!-- <a href="/playlists/{{this.playlist_id}}" class="btn btn-primary">Go to Playlist</a> --}}
+                            <a href="/view_mood/{{this.playlist_id}}" class="btn btn-secondary">View Mood</a>
                         </div>
                     </div>
                 </div>
