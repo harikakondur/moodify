@@ -79,7 +79,10 @@ app.use(
   })
 );
 
-app.use(express.static(__dirname + '/public'));
+
+app.use(express.static('src/resources'));
+//app.use('/resources', express.static(path.join(__dirname, 'resources')));
+
 
 const tokens = {
   access:undefined,
@@ -89,14 +92,22 @@ const tokens = {
 //-------------------------------------FUNCTIONS -----------------------------
 async function insertPlaylists(playlistJson,username){
   console.log("Inside insertPlaylists()")
+  console.log("playlistJson:", playlistJson)
     var playlistCount= playlistJson.limit
 
     for (i=0;i<playlistCount;i++){
+      console.log(playlistJson.items[i])
         var id=playlistJson.items[i].id
         var name=playlistJson.items[i].name
-        var img=playlistJson.items[i].images[0].url
-        var total=playlistJson.items[i].tracks.total
-        //var mood
+
+        console.log("playlistJson.items[i].images",playlistJson.items[i].images)
+        if(playlistJson.items[i].images!=null){
+          var img=playlistJson.items[i].images[0].url
+        }
+        else{
+          var img = "/images/default_img.png"
+        }
+
         let insert = `
     INSERT INTO playlists(playlist_id, playlist_owner, playlist_name, playlist_img,track_count)
     SELECT '${id}', '${username}', '${name}', '${img}','${total}'
