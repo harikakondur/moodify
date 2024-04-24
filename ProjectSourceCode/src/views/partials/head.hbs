@@ -14,11 +14,15 @@
       <!-- Link to Google Fonts for Comfortaa font -->
       <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
       <!-- Link to your custom CSS -->
-      <link rel="stylesheet" href="../../resources/css/style.css" type="text/css">
-     
+
+      <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 
 </head>
+
+
 <style>
 /* Ensures the image is appropriately sized and aligned */
 .img-fluid {
@@ -40,11 +44,10 @@ h2, h4 {
 .container-fluid {
     padding-top: 20px;  /* Reduced padding to better fit content and navbar */
     padding-bottom: 20px; /* Adds padding to the bottom for spacing within the container */
-    margin-left: 0; /* Ensures no margin on the left */
-    margin-right: 0; /* Ensures no margin on the right */
-    padding-left: 0; /* Ensures no padding on the left */
-    padding-right: 0; /* Ensures no padding on the right */
-    background-color: #f8f9fa; /* Light gray color */
+    margin-bottom: 20px; /* Reduced margin to decrease space between this and the next container */
+    padding-left: 0;
+    padding-right: 0;
+    background-color: #daffcc; /* Light gray color */
     min-height: auto; /* Adjust height based on content instead of viewport */
     box-sizing: border-box; /* Ensures padding doesn't affect overall width */
 }
@@ -258,6 +261,113 @@ label {
     font-size: 0.8rem; /* Smaller font size for buttons to fit neatly */
     padding: 5px 10px; /* Smaller padding to ensure buttons do not take up too much space */
 }
+
+/* Custom button styling */
+/* General body styles */
+body {
+  background-color: #daffcc; /* Light green background for a fresh feel */
+  color: black; /* Standard text color for readability */
+  font-family: 'Comfortaa', cursive; /* Comfortable and stylish font for text */
+  padding: 20px; /* Padding around the content to avoid touching the edges */
+}
+
+/* Container for playlists and other content, centered with max width */
+.container {
+  max-width: 960px;
+  margin: 0 auto; /* Centering the container */
+  background-color: #daffcc; /* Light grey background for the container */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Subtle shadow for depth */
+}
+
+/* Playlist row styling */
+.row {
+  display: flex;
+  align-items: center; /* Align items vertically */
+  margin-bottom: 20px; /* Space between rows */
+}
+
+/* Column styling for responsive images and list */
+.col-md-6 {
+  flex: 50%; /* Divide the space evenly */
+}
+
+/* Styling for images to make them responsive and rounded */
+img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px; /* Rounded corners for images */
+}
+
+/* List styling for clarity and alignment */
+.list-group {
+  list-style: none; /* Remove default list styling */
+  padding: 0;
+}
+
+.list-group-item {
+  background-color: transparent; /* No background to blend with the container */
+  border: none; /* No borders for a cleaner look */
+  padding: 10px 0; /* Padding for spacing */
+  border-bottom: 1px solid #ccc; /* Light separator between items */
+}
+
+.list-group-item:last-child {
+  border-bottom: none; /* No border for the last item */
+}
+
+/* Carousel styling */
+.carousel {
+  position: relative; /* Positioning context for absolute positioned elements */
+  margin-top: 20px;
+}
+
+.carousel-item {
+  text-align: center; /* Center the text and content in carousel */
+}
+
+.carousel-caption {
+  background-color: rgba(0,0,0,0.5); /* Semi-transparent background for readability */
+  border-radius: 5px; /* Rounded corners for the caption box */
+  padding: 10px; /* Padding inside the caption */
+  display: inline-block; /* Block level but only as wide as its content */
+  margin-bottom: 20px; /* Space below the caption */
+}
+
+/* Button styling across the site for consistency */
+.btn {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border-radius: 5px; /* Rounded corners for buttons */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+.btn:hover {
+  background-color: #333; /* Darker grey on hover for feedback */
+}
+
+/* Utility classes for text alignment */
+.text-center {
+  text-align: center;
+}
+
+/* Visually-hidden class for accessibility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+
 
 
 

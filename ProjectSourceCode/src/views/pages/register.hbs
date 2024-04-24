@@ -1,22 +1,37 @@
-{{>message}}
- {{> navbar isLoggedIn=false }}
-<div>
-<h1>Register</h1>
-<p>Welcome {{spotifyUsername}}</p>
-</div>
+{{> message}}
+{{> navbar isLoggedIn=false }}
 
-<div class="container-sm">
-<form action="/register" method="post" >
-    <input type="hidden" name="spotifyUsername" value="{{spotifyUsername}}">
-
-    <h1 class="mt-5">Create Password</h1>
-    <div class="form-group">
-    <label for="password">Password</label>
-    <input type="password" name="password" class="form-control" id="password" >
+<!-- Main Container -->
+<div class="container mt-5" style="max-width: 960px;"> <!-- Increased max-width -->
+  <!-- Title and Welcome Message -->
+  <div class="text-center mb-4">
+    <h1>Register</h1>
+    <p>Welcome, please create your account.</p>
   </div>
-  <button type="submit" class="btn btn-primary mt-3">Submit</button>
-  <br>
- 
-</form>
- <p>Already have an account? <a href="/login">Login</a></p>
- </div> 
+
+  <!-- Form Container -->
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10"> <!-- Adjusted for a wider form -->
+      <form action="/register" method="post">
+        {{!-- <!-- Username Field -->
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" name="username" class="form-control" id="username" placeholder="Choose a username">
+        </div> --}}
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" name="password" class="form-control" id="password" placeholder="Create a password">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary mt-3 center-button">Create Account</button>
+
+
+        <!-- Login Redirect Link -->
+        <p class="mt-4 text-center">Already have an account? <a href="/login">Login here</a></p>
+      </form>
+    </div>
+  </div>
+</div>
