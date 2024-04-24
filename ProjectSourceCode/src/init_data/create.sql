@@ -19,7 +19,6 @@ create table if not exists playlists(
     genre1 varchar(30),
     genre2 varchar(30),
     genre3 varchar(30)
-
 );
 
 -- create table if not exists playlist_mood(
