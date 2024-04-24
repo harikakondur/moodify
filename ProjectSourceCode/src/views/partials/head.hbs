@@ -20,6 +20,35 @@
 
 </head>
 <style>
+/* Ensures the image is appropriately sized and aligned */
+.img-fluid {
+    max-width: 200px;  /* Adjust based on your preference */
+    height: auto;
+}
+
+/* Adds some spacing and font sizing to the headers */
+h2, h4 {
+    margin-bottom: 0.5rem;
+}
+
+/* Enhances the visual separation and alignment of stats */
+.bg-dark p {
+    text-align: center;
+    margin: 0;
+}
+
+.container-fluid {
+    padding-top: 20px;  /* Reduced padding to better fit content and navbar */
+    padding-bottom: 20px; /* Adds padding to the bottom for spacing within the container */
+    margin-left: 0; /* Ensures no margin on the left */
+    margin-right: 0; /* Ensures no margin on the right */
+    padding-left: 0; /* Ensures no padding on the left */
+    padding-right: 0; /* Ensures no padding on the right */
+    background-color: #f8f9fa; /* Light gray color */
+    min-height: auto; /* Adjust height based on content instead of viewport */
+    box-sizing: border-box; /* Ensures padding doesn't affect overall width */
+}
+
 
 body {
     background-size: cover; /* Covers the entire area, adapting to different content heights */
@@ -32,7 +61,6 @@ body {
 }
 
 .container-home {
-   
     max-width: 960px;
     margin: 40px auto;
     padding: 20px;
