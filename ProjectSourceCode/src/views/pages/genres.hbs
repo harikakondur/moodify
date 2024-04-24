@@ -102,14 +102,55 @@
 
 
 
-  <!-- Suggested Songs Container -->
+  {{!-- <!-- Suggested Songs Container -->
   <div class="suggested-songs-container text-center mt-5">
-    <h3>Suggested Songs</h3>
-    <ul class="list-group">
-      {{#each suggested_songs}}
-        <li class="list-group-item">{{this.name}}</li>
+    <form action="/suggestions" method="post">
+      <input type="hidden" name="averageValence" value="{{averageValence}}">
+      <input type="hidden" name="averageEnergy" value="{{averageEnergy}}">
+      <input type="hidden" name="averageDanceability" value="{{averageEnergy}}">
+      {{#each genres}}
+      <input type="hidden" name="genres[]" value="{{this.genre}}">
       {{/each}}
-    </ul>
+      <!-- Add more inputs as needed -->
+      <button type="submit" class="btn btn-secondary">Suggest Songs</button>
+    </form>
   </div>
+</div> --}}
+
+<div class="suggested-songs-container text-center mt-5">
+  <button id="suggest-songs-button" class="btn btn-secondary">Get Suggestions</button>
+  <ul id="suggested-songs" class="list-group" style="display: none;">
+    <!-- Songs will be added here -->
+  </ul>
 </div>
 
+<script>
+  console.log('Script loaded');
+  document.getElementById('suggest-songs-button').addEventListener('click', function() {
+    console.log('Button clicked');
+    const url = '/suggestions?averageValence={{averageValence}}&averageEnergy={{averageEnergy}}&averageDanceability={{averageDanceability}}&genres=' + encodeURIComponent(JSON.stringify({{genres}}));
+    console.log('Fetch URL:', url);
+    fetch(url, {
+      method: 'GET',
+    })
+    .then(response => {
+      console.log('Received response:', response);
+      return response.json();
+    })
+    .then(songs => {
+      console.log('Received songs:', songs);
+      var button = document.getElementById('suggest-songs-button');
+      var list = document.getElementById('suggested-songs');
+      songs.forEach(song => {
+        var li = document.createElement('li');
+        li.textContent = song.name + ' by ' + song.artist;
+        li.className = 'list-group-item';
+        list.appendChild(li);
+      });
+      // Remove the button and show the list
+      button.style.display = 'none';
+      list.style.display = 'block';
+    })
+    .catch(error => console.error('Error:', error));
+  });
+</script>

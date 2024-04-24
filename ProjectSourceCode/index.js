@@ -324,7 +324,7 @@ app.post('/register', async (req, res) => {
     });
 });
 
-app.get('/playlistsHomePage', async (req, res) => {
+app.get('/playlistsHomePage', async (req, res) => {  
   console.log("in /playlists homepage")
   console.log("/playlist home page username: ",tokens.username)
   const  usern  = tokens.username
@@ -520,36 +520,41 @@ app.get('/view_mood/:id', async (req, res) => {
   })
 });
 
+app.get('/suggestions', (req, res) => {
+  const averageValence = req.query.averageValence;
+  const averageEnergy = req.query.averageEnergy;
+  const averageDanceability = req.query.averageDanceability;
+  const genres = req.query.genres;
+
+  // Use the query parameters to make a request to the Spotify API
+  axios.get('https://api.spotify.com/v1/recommendations', {
+    params: {
+      seed_genres: genres,
+      target_danceability: averageDanceability,
+      target_energy: averageEnergy,
+      target_valence: averageValence,
+    },
+    headers: {
+      Authorization: 'Bearer ' + tokens.access, 
+    },
+  })
+  .then(response => {
+    // Extract the songs from the Spotify API response
+    const songs = response.data.tracks.map(track => ({
+      name: track.name,
+      artist: track.artists[0].name,
+    }));
+
+    // Send the list of songs as a JSON response
+    res.json(songs);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('An error occurred while fetching songs from Spotify.');
+  });  
+});
 
 
-//           console.log("TOP GENRES", topGenres)
-//           var query = `UPDATE playlists SET genre1='${topGenres[0].genre}', genre2='${topGenres[1].genre}', genre3='${topGenres[2].genre}' WHERE playlist_id='${pid}'`;
-//           db.query(query, (error, results) => {
-//             if (error) {
-//               console.error(error);
-//             } else {
-//               console.log("Genres inserted successfully"); 
-//             }
-//           });
-//           res.render('pages/genres', {    
-//             genres: topGenres,
-//             playlistName: results.data.name,
-//             img: results.data.images[0].url,
-//             averageDanceability: fetchResult.averageDanceability*100,
-//             averageEnergy: fetchResult.averageEnergy*100,
-//             averageValence: fetchResult.averageValence*100  
-//           });
-//         })
-//         .catch(error => {
-//           console.error(error);
-//         });
-//       }
-//     });
-//   })
-//   .catch(error => {
-//     console.error(error);
-//   });
-// });
 
 
 
@@ -699,15 +704,10 @@ app.get('/callback', function(req, res) {
           console.log(body.id);
         });
 
-        // we can also pass the token to the browser to make requests from there
-        // res.redirect('/home')
-        //   console.log(querystring.stringify({
-        //     access_token: access_token,
-        //     refresh_token: refresh_token
-        //   }))
+     
       } else {
         res.redirect('/#' +
-          querystring.stringify({
+          querystring.stringify({ 
             error: 'invalid_token'
           }));
       }
