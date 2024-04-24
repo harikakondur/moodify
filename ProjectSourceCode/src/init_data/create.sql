@@ -21,6 +21,14 @@ create table if not exists playlists(
     genre3 varchar(30)
 );
 
+create table if not exists dummy_playlists(
+    playlist_id varchar(50) primary key,
+    playlist_owner varchar(50),
+    playlist_name varchar(50),
+    playlist_img varchar(250),
+    mood_name varchar(50),
+);
+
 -- create table if not exists playlist_mood(
 --     playlist_id int references playlists(playlist_id),
 --     mood1 int not null,
