@@ -24,8 +24,8 @@ const dbConfig = {
   host: 'db',
   port: 5432,
   database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD
+  user: process.env.POSTGRES_USER,  
+  password: process.env.POSTGRES_PASSWORD 
 };
 
 
@@ -99,8 +99,15 @@ async function insertPlaylists(playlistJson,username){
     for (i=0;i<playlistCount;i++){
         var id=playlistJson.items[i].id
         var name=playlistJson.items[i].name
-        var img=playlistJson.items[i].images[0].url
+        //var img=playlistJson.items[i].images[0].url
+        
         var trackCount=playlistJson.items[i].tracks.total
+        if(playlistJson.items[i].images!=null){
+          var img=playlistJson.items[i].images[0].url
+        }
+        else{
+          var img = "/images/default_img.png"
+        }
         let insert = `
         INSERT INTO playlists(playlist_id, playlist_owner, playlist_name, playlist_img, track_count)
         SELECT '${id}', '${username}', '${name}', '${img}', ${trackCount}
