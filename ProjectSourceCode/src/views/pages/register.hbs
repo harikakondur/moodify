@@ -6,19 +6,17 @@
   <!-- Title and Welcome Message -->
   <div class="text-center mb-4">
     <h1>Register</h1>
-    <p>Welcome, please create your account.</p>
+    <p>Welcome, {{this.spotifyUsername}} please create your account.</p>
   </div>
 
   <!-- Form Container -->
   <div class="row justify-content-center">
     <div class="col-lg-8 col-md-10"> <!-- Adjusted for a wider form -->
       <form action="/register" method="post">
-        {{!-- <!-- Username Field -->
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" name="username" class="form-control" id="username" placeholder="Choose a username">
-        </div> --}}
-
+        <!-- Username Field -->
+        <input type="hidden" name="spotifyUsername" value="{{spotifyUsername}}">
+        <input type="hidden" name="followers" value="{{followers}}">
+        <input type="hidden" name="profilePic" value="{{profilePic}}">
         <!-- Password Field -->
         <div class="form-group">
           <label for="password">Password</label>

@@ -1,9 +1,9 @@
 {{!-- FOR TESTING, we can change it later --}}
-<ul>
+{{!-- <ul>
   {{#each genres}}
     <li>{{this.genre}}: {{this.count}}</li>
   {{/each}}
-</ul>
+</ul> --}}
 
 {{> navbar isLoggedIn=true }}
 <!-- Content for the home page -->
@@ -12,31 +12,31 @@
     <div class="row p-3">
         <!-- Profile Image Section -->
         <div class="col-md-3">
-            <img src="../../resources/images/download.jpeg" class="img-fluid rounded-circle" alt="Profile Image">
+            <img src="{{img}}" class="img-fluid rounded-circle" alt="Profile Image">
         </div>
 
         <!-- About Me and Progress Bars Section -->
         <div class="col-md-9">
             <!-- About Me -->
             <div class="mb-4">
-                <h2 class="card-text">Playlist Name</h2>
+                <h2 class="card-text">Playlist Name: {{playlistName}}</h2>
             </div>
 
             <!-- Progress Bars -->
             <div class="mb-4">
                 <h4>Danceability</h4>
                 <div class="progress mb-3" style="height: 5px">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
+                  <div class="progress-bar bg-primary" role="progressbar" style="width: {{averageDanceability}}%" aria-valuenow="{{averageDanceability}}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
 
                 <h4>Energy</h4>
                 <div class="progress mb-3" style="height: 5px">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{averageEnergy}}%" aria-valuenow="{{averageEnergy}}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
 
                 <h4>Valence</h4>
                 <div class="progress mb-3" style="height: 5px">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{averageValence}}%" aria-valuenow="{{averageValence}}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
 
                 <!-- Add more progress bars as needed -->
@@ -46,7 +46,7 @@
 </div>
 
 
-<div id="carouselExample" class="carousel slide">
+{{!-- <div id="carouselExample" class="carousel slide">
   <div class="carousel-inner">
     <div class="carousel-item active">
       <img src="../../resources/images/download.jpeg" class="d-block w-100" alt="...">
@@ -66,7 +66,7 @@
     <span class="carousel-control-next-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Next</span>
   </button>
-</div>
+</div> --}}
 
 
 
@@ -80,13 +80,11 @@
     <!-- Stats Bar redesigned as Genres and Mood sections -->
     <div class="row bg-dark text-white p-2">
         <div class="col-md-6">
-            <h3>Top 5 Genres</h3>
+            <h3>Top 3 Genres</h3>
             <ul>
-                <li>Gibberish1</li>
-                <li>Gibberish2</li>
-                <li>Gibberish3</li>
-                <li>Gibberish4</li>
-                <li>Gibberish5</li>
+                {{#each genres}}
+                    <li>{{this.genre}}</li>
+                {{/each}}
             </ul>
         </div>
         <div class="col-md-6">
@@ -114,5 +112,4 @@
     </ul>
   </div>
 </div>
-</body>
-</html>
+
