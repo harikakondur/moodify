@@ -16,6 +16,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session'); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part C.
 
+const { genresByMood } = require('./G2M');
 
 // -------------------------------------  DB CONFIG AND CONNECT   ---------------------------------------
 const dbConfig = {
@@ -92,15 +93,13 @@ const tokens = {
 //-------------------------------------FUNCTIONS -----------------------------
 async function insertPlaylists(playlistJson,username){
   console.log("Inside insertPlaylists()")
-  console.log("playlistJson:", playlistJson)
     var playlistCount= playlistJson.limit
 
     for (i=0;i<playlistCount;i++){
-      console.log(playlistJson.items[i])
         var id=playlistJson.items[i].id
         var name=playlistJson.items[i].name
-        var total = playlistJson.items[i].tracks.total;
-        console.log("playlistJson.items[i].images",playlistJson.items[i].images)
+        var img=playlistJson.items[i].images[0].url
+        var trackCount=playlistJson.items[i].tracks.total
         if(playlistJson.items[i].images!=null){
           var img=playlistJson.items[i].images[0].url
         }
@@ -108,12 +107,13 @@ async function insertPlaylists(playlistJson,username){
           var img = "/images/default_img.png"
         }
         let insert = `
-    INSERT INTO playlists(playlist_id, playlist_owner, playlist_name, playlist_img,track_count)
-    SELECT '${id}', '${username}', '${name}', '${img}','${total}'
-    WHERE NOT EXISTS (
-        SELECT 1 FROM playlists WHERE playlist_id='${id}'
-    )
-`;
+        INSERT INTO playlists(playlist_id, playlist_owner, playlist_name, playlist_img, track_count)
+        SELECT '${id}', '${username}', '${name}', '${img}', ${trackCount}
+        WHERE NOT EXISTS (
+            SELECT 1 FROM playlists WHERE playlist_id='${id}'
+        )
+    `;
+        //let insert=`insert into playlists(playlist_id,playlist_owner,playlist_name,playlist_img) values('${id}', '${username}', '${name}', '${img}') where not exists (select playlist_id from playlists where playlistid='${id}')`
         console.log("INSERTING ",insert)
         // execute the insert query here
         db.query(insert, (err, res) => {
@@ -125,23 +125,40 @@ async function insertPlaylists(playlistJson,username){
           })
     }
 }
-
 // async function fetchGenres(playlistJson,total){
 //   console.log("inside fetchGenres")
 //   var allGenres = {} //this will collect all the genres (genre:count)
+//   var promises = []; // this will collect all the promises
+//   let totalValence = 0.0;
+//   let totalDanceability = 0.0;
+//   let totalEnergy = 0.0;
 
 //   //parsing through each track
 //   for (let i = 0; i < total; i++){
-
+//     const trackId = playlistJson.tracks.items[i].track.id;
+//     console.log("TRACK ID: ",trackId)
 //     var artistSongUrl = playlistJson.tracks.items[i].track.album.artists[0].href //artist endpoint
-    
-//     axios.get(artistSongUrl, {
-//       headers: {
-//         'Authorization': "Bearer " + tokens.access
-//       }
-//     })
-//     .then(result => {
-//       var artistGenres = result.data.genres //artist genres
+//     const audioResponseUrl = `https://api.spotify.com/v1/audio-features/${trackId}`
+
+//     var promise = Promise.all([
+//       axios.get(artistSongUrl, {
+//         headers: {
+//           'Authorization': "Bearer " + tokens.access
+//         }
+//       }),
+//       axios.get(audioResponseUrl, {
+//         headers: {
+//           'Authorization': "Bearer " + tokens.access
+//         }
+//       })
+//     ]).then(([artistResult, audioResult]) => {
+//       //audio stuff
+//       totalValence += audioResult.data.valence;
+//       totalDanceability += audioResult.data.danceability;
+//       totalEnergy += audioResult.data.energy;
+
+//       //genre stuff
+//       var artistGenres = artistResult.data.genres //artist genres
 //       console.log("artistgenres:",artistGenres)
 //       // Add genres to allGenres
 //       artistGenres.forEach(genre => {
@@ -152,53 +169,56 @@ async function insertPlaylists(playlistJson,username){
 //         }  
 //       });
 
+//       // You can now access audioResult.data to get the audio features
+//       // For example:
+//       // let audioFeatures = audioResult.data;
+//       // console.log("audioFeatures:", audioFeatures)
+
 //     }).catch(err => {
 //       console.log("fetching artist genre error: ",err)
 //     });
+
+//     promises.push(promise);
 //   }
-//   console.log("allgenres after fetching",allGenres)
+
+//   await Promise.all(promises);
+//   console.log("Total Valence:", totalValence);
+//   console.log("Total Danceability:", totalDanceability);
+//   console.log("Total Energy:", totalEnergy);
+        
+//   //console.log("allgenres after fetching",allGenres)
 //   return allGenres
-  
 // }
 
-async function fetchGenres(playlistJson,total){
-  console.log("inside fetchGenres")
-  var allGenres = {} //this will collect all the genres (genre:count)
-  var promises = []; // this will collect all the promises
 
-  //parsing through each track
-  for (let i = 0; i < total; i++){
 
-    var artistSongUrl = playlistJson.tracks.items[i].track.album.artists[0].href //artist endpoint
-    
-    var promise = axios.get(artistSongUrl, {
-      headers: {
-        'Authorization': "Bearer " + tokens.access
-      }
-    })
-    .then(result => {
-      var artistGenres = result.data.genres //artist genres
-      console.log("artistgenres:",artistGenres)
-      // Add genres to allGenres
-      artistGenres.forEach(genre => {
-        if (allGenres[genre]) { 
-          allGenres[genre]++
-        } else {
-          allGenres[genre] = 1
-        }  
-      });
-
-    }).catch(err => {
-      console.log("fetching artist genre error: ",err)
+function generateMood(genreArray) {
+  console.log("inside generate mood");
+    const moodCount = {
+        'euphoric': 0,
+        'sad': 0,
+        'peaceful': 0,
+        'dramatic': 0,
+        'romantic': 0
+    };
+    genreArray.forEach((item) => {
+        for (let [mood, genres] of Object.entries(genresByMood)) {
+            if (genres.includes(item.genre)) {
+                moodCount[mood] += item.count; // Add the count to the mood if the genre is found in its array
+            }
+        }
     });
-
-    promises.push(promise);
-  }
-
-  await Promise.all(promises);
-  //console.log("allgenres after fetching",allGenres)
-  return allGenres
+    let maxMood = '';
+    let maxCount = -1;
+    for (let [mood, count] of Object.entries(moodCount)) {
+        if (count > maxCount) {
+            maxCount = count;
+            maxMood = mood;
+        }
+    }
+    return maxMood;
 }
+
 
 // -----------ROUTES---------------------
 
@@ -220,7 +240,24 @@ app.get('/register', (req,res)=>{
 });
 
 app.get('/home', (req,res)=>{
+  console.log("TOKEN",tokens.access)
   res.render('pages/home');
+});
+
+app.get('/', (req,res)=>{
+  res.redirect('/user');
+});
+
+app.get('/user', (req,res)=>{
+  res.render('pages/user');
+});
+
+app.get('/', (req,res)=>{
+  res.redirect('/genres');
+});
+
+app.get('/genres', (req,res)=>{
+  res.render('pages/genres');
 });
 
 
@@ -259,8 +296,11 @@ app.post('/login', async(req,res)=>{
 app.post('/register', async (req, res) => {
   const hash = await bcrypt.hash(req.body.password, 10);
   const spotifyUsername = req.body.spotifyUsername;
+  const followers = req.body.followers;
+  const profilePic = req.body.profilePic;
   console.log(spotifyUsername, " in post")
-  let query = 'insert into users (spotifyuser,password) values ($1,$2) returning *';
+  console.log("followers",followers)
+  let query = 'INSERT INTO users (spotifyuser, password, followers, profile_pic) VALUES ($1, $2, $3, $4) RETURNING *';
   let checkExists = `select * from users where spotifyuser=$1`;
 
   // Check if user already exists
@@ -271,7 +311,7 @@ app.post('/register', async (req, res) => {
         res.render('pages/login',{message:"Account already exists, please login"});
       } else {
         // User doesn't exist, proceed with registration
-        db.one(query, [spotifyUsername, hash])
+        db.one(query, [spotifyUsername, hash, followers, profilePic])
           .then(user => {
             console.log("inserted user", user);
             res.redirect('/login');
@@ -290,16 +330,22 @@ app.post('/register', async (req, res) => {
     });
 });
 
-app.get('/playlistsHomePage', async (req, res) => {
+app.get('/playlistsHomePage', async (req, res) => {  
   console.log("in /playlists homepage")
-  console.log("/playlisy home page username: ",tokens.username)
+  console.log("/playlist home page username: ",tokens.username)
   const  usern  = tokens.username
   
   const q = await db.query(`SELECT * FROM playlists WHERE playlist_owner='${usern}'`)
-  .then(result => {
+  .then(async result => {
     console.log('success?')
-    console.log("ROWS: ",result)
-    res.render('pages/home', { playlists: result });
+    //console.log("ROWS: ",result)
+
+    //another query here
+    const user = await db.query(`SELECT * FROM users WHERE spotifyuser='${usern}'`);
+    const profile_pic = user[0].profile_pic;
+    const followers = user[0].followers;
+
+    res.render('pages/home', { playlists: result, usern, profile_pic, followers });
   }).catch(err => {
     console.log(err)
   });
@@ -317,7 +363,7 @@ app.get('/get_playlists', async (req,res)=>{
       'Authorization': tokenp
     }})
     .then(results => {
-      console.log("RESULTS",results.data)
+      //console.log("RESULTS",results.data)
       console.log("get_playlists usernmae",tokens.username)
       insertPlaylists(results.data,tokens.username);
       res.redirect('/playlistsHomePage');
@@ -329,45 +375,205 @@ app.get('/get_playlists', async (req,res)=>{
 });
 
 
-//get playlist object>>tracks>>for each track>>get artist>>genres
-// add those genres to dictionary
-//pass dict to generatemood()
-//
+async function fetchMetrics(playlistJson,total){
+  console.log("inside fetchGenres")
+  var allGenres = {} //this will collect all the genres (genre:count)
+  var artists=[]
+  var promises = []; // this will collect all the promises
+
+  let totalValence = 0.0;
+  let totalDanceability = 0.0;
+  let totalEnergy = 0.0;
+
+  var audioUrl='https://api.spotify.com/v1/audio-features/{id}'
+  //parsing through each track
+  for (let i = 0; i < total; i++){
+    const trackId = playlistJson.tracks.items[i].track.id;
+    console.log("TRACK ID: ",trackId)
+    //var artistSongUrl = playlistJson.tracks.items[i].track.album.artists[0].href //artist endpoint
+    var artistId = playlistJson.tracks.items[i].track.artists[0].id //artist endpoint
+    artists.push(artistId);
+    const audioResponse = `https://api.spotify.com/v1/audio-features/${trackId}`
+
+    var promise = axios.get(audioResponse, {
+      headers: {
+        'Authorization': "Bearer " + tokens.access
+      }
+    })
+    .then(audioResult => {
+      //console.log("AUDIO",audioResult.data);
+      //var dance = result.data.danceability //artist genres
+      //console.log("dance",dance) 
+      totalValence += audioResult.data.valence;
+      totalDanceability += audioResult.data.danceability;
+      totalEnergy += audioResult.data.energy;
+
+    }).catch(err => {
+      console.log("fetching artist genre error: ",err)
+    });
+
+    promises.push(promise);
+  }
+
+  await Promise.all(promises);
+  console.log("artist ids after fetching",artists)
+  console.log("Artists: ", artists);
+  console.log("Average Danceability: ", totalDanceability / total);
+  console.log("Average Energy: ", totalEnergy / total);
+  console.log("Average Valence: ", totalValence / total);
+  return {
+  artists: artists,
+  averageDanceability: totalDanceability / total,
+  averageEnergy: totalEnergy / total,
+  averageValence: totalValence / total
+};
+}
+
+function createGenreArray(artistsJson){
+  let genreCount = {};
+  console.log("JSON",artistsJson)
+    artistsJson.artists.forEach(artist => {
+        artist.genres.forEach(genre => {
+            if (genreCount[genre]) {
+                genreCount[genre]++;
+            } else {
+                genreCount[genre] = 1;
+            }
+        });
+    });
+    return genreCount;
+}
+
 app.get('/view_mood/:id', async (req, res) => {
+  console.log("Inside /view_mood/:id route");
   var pid = req.params.id;
   const url = `https://api.spotify.com/v1/playlists/${pid}`;
+  console.log(pid)
+
   axios.get(url, {
-    headers: {
-      'Authorization': "Bearer " + tokens.access
-    }
+    headers: {'Authorization': "Bearer " + tokens.access}
   })
-  .then(async results => {
-    console.log("PLAYLIST: ",results.data)
-    var total=results.data.tracks.total
-    var allGenres = await fetchGenres(results.data,total);
-    // Convert allGenres object to array of objects
-    var genreArray = Object.keys(allGenres).map(genre => {
-      return { genre: genre, count: allGenres[genre] };
-    });
-    console.log("GENRE ARRAY",genreArray)
-    // Sort genreArray by count in descending order and take the first three genres
-    var topGenres = genreArray.sort((a, b) => b.count - a.count).slice(0, 3);
+  .then(async playlistResult => {
+    console.log("PLAYLIST: ",playlistResult.data)
+    let check = `SELECT * FROM playlists WHERE playlist_name='${playlistResult.data.name}'`;
 
-    console.log("TOP GENRES", topGenres)
+    //check if mood has already been generated
+    console.log("Running db.query with check:", check);
 
-    // Insert top genres into playlists table
-    var query = `UPDATE playlists SET genre1='${topGenres[0].genre}', genre2='${topGenres[1].genre}', genre3='${topGenres[2].genre}' WHERE playlist_id='${pid}'`;
-    db.query(query, (error, results) => {
-      if (error) {
-        console.error(error);
-      } else {
-        console.log("Genres inserted successfully");
+    db.oneOrNone(check)
+    .then(async dbResult => {
+      console.log("db.query result:", dbResult);
+      // rest of your code...
+       // CASE 1: playlist exists and mood had been generated already
+       if(dbResult && dbResult.mood != null){
+        console.log("Mood is not null");
+        let genreCount = {
+          [dbResult.genre1]: 1,
+          [dbResult.genre2]: 1,
+          [dbResult.genre3]: 1
+        };
+        res.render('pages/genres', {    
+          playlistName: playlistResult.data.name,
+          img: playlistResult.data.images[0].url,
+          mood: dbResult.mood,
+          genres: genreCount
+        });
       }
-    });
+      // CASE 2: playlist exists but mood has NOT been generated
+      else{
+        console.log("hi")
+        var total=playlistResult.data.tracks.total
+        var fetchResult = await fetchMetrics(playlistResult.data, total);
+        var artistids=fetchResult.artists.join(",")
+        var severalArtistsUrl=`https://api.spotify.com/v1/artists?ids=${artistids}`
+        axios.get(severalArtistsUrl,{
+        headers: {'Authorization': "Bearer " + tokens.access}
+      })
+      .then(artists => {
+      var allGenres=createGenreArray(artists.data);
+      console.log("GENRES",allGenres)
+      var genreArray = Object.keys(allGenres).map(genre => {
+        return { genre: genre, count: allGenres[genre] };
+      });
+      var topGenres = genreArray.sort((a, b) => b.count - a.count).slice(0, 3);
 
-    res.render('pages/genres', { genres: genreArray });
+      console.log("TOP GENRES", topGenres)
+          var query = `UPDATE playlists SET genre1='${topGenres[0].genre}', genre2='${topGenres[1].genre}', genre3='${topGenres[2].genre}' WHERE playlist_id='${pid}'`;
+          db.query(query, (error, results) => {
+            if (error) {
+              console.error(error);
+            } else {
+              console.log("Genres inserted successfully"); 
+            }
+          });
+          res.render('pages/genres', {    
+            genres: topGenres,
+            playlistName: playlistResult.data.name,
+            img: playlistResult.data.images[0].url,
+            averageDanceability: fetchResult.averageDanceability*100,
+            averageEnergy: fetchResult.averageEnergy*100,
+            averageValence: fetchResult.averageValence*100  
+          });
+        })
+      }
+    })
+    .catch(err => {
+      console.error("db.query error:", err);
+    });
   })
-    //var valence,dance,energy=generateMetrics(results);
+  .catch(err=>{
+    console.log("Fetching playlist error",err)
+  })
+});
+
+app.get('/suggestions', (req, res) => {
+  const averageValence = req.query.averageValence;
+  const averageEnergy = req.query.averageEnergy;
+  const averageDanceability = req.query.averageDanceability;
+  const genres = req.query.genres;
+
+  // Use the query parameters to make a request to the Spotify API
+  axios.get('https://api.spotify.com/v1/recommendations', {
+    params: {
+      seed_genres: genres,
+      target_danceability: averageDanceability,
+      target_energy: averageEnergy,
+      target_valence: averageValence,
+    },
+    headers: {
+      Authorization: 'Bearer ' + tokens.access, 
+    },
+  })
+  .then(response => {
+    // Extract the songs from the Spotify API response
+    const songs = response.data.tracks.map(track => ({
+      name: track.name,
+      artist: track.artists[0].name,
+    }));
+
+    // Send the list of songs as a JSON response
+    res.json(songs);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('An error occurred while fetching songs from Spotify.');
+  });  
+});
+
+
+
+
+
+
+
+// var genreArray = Object.keys(allGenres).map(genre => {
+    //   return { genre: genre, count: allGenres[genre] };
+    // });
+    //var mood = generateMood(ge);
+    //console.log("MOOD:",mood)
+    // Sort genreArray by count in descending order and take the first three genres
+    
+//var valence,dance,energy=generateMetrics(results);
     //var mood = generateMood(genreArray);
     // You may want to do something with 'mood' here, like sending it in the response
     // db.query(`UPDATE playlists set mood_name='${mood}' WHERE playlist_id='${pid}'`)
@@ -378,11 +584,6 @@ app.get('/view_mood/:id', async (req, res) => {
     //   console.log("cannot fetch playlist err: ",err)
     // });
     
-  .catch(error => {
-    console.error(error);
-  });
-});
-
 app.get('/logout',(req,res)=>{
   res.render('pages/login',{message:"Logged out Successfully."});
 });
@@ -498,20 +699,21 @@ app.get('/callback', function(req, res) {
         request.get(options, function(error, response, body) {
           const spotifyUsername=body.id //fetch the spotify username
           tokens.username=body.id //save for later
+          var followers=body.followers.total
+          var profilePic=body.images[0].url
           console.log("updated username token: ",tokens.username)
-          res.render('pages/register',{spotifyUsername:spotifyUsername})
+          res.render('pages/register', {
+            spotifyUsername: spotifyUsername,
+            followers: followers,
+            profilePic: profilePic
+          });
           console.log(body.id);
         });
 
-        // we can also pass the token to the browser to make requests from there
-        // res.redirect('/home')
-        //   console.log(querystring.stringify({
-        //     access_token: access_token,
-        //     refresh_token: refresh_token
-        //   }))
+     
       } else {
         res.redirect('/#' +
-          querystring.stringify({
+          querystring.stringify({ 
             error: 'invalid_token'
           }));
       }
@@ -693,3 +895,4 @@ app.get('/home', (req, res) => {
     res.redirect('/login');
   }
 });
+

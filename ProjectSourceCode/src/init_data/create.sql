@@ -14,7 +14,7 @@ create table if not exists playlists(
     mood_name varchar(50),
     valence float,
     energy float,
-    dancebility float,
+    danceability float,
     track_count int,
     genre1 varchar(30),
     genre2 varchar(30),
