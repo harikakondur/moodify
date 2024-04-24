@@ -93,28 +93,21 @@ const tokens = {
 //-------------------------------------FUNCTIONS -----------------------------
 async function insertPlaylists(playlistJson,username){
   console.log("Inside insertPlaylists()")
-  console.log("playlistJson:", playlistJson)
     var playlistCount= playlistJson.limit
 
     for (i=0;i<playlistCount;i++){
-      console.log(playlistJson.items[i])
         var id=playlistJson.items[i].id
         var name=playlistJson.items[i].name
-        var total = playlistJson.items[i].tracks.total;
-        console.log("playlistJson.items[i].images",playlistJson.items[i].images)
-        if(playlistJson.items[i].images!=null){
-          var img=playlistJson.items[i].images[0].url
-        }
-        else{
-          var img = "/images/default_img.png"
-        }
+        var img=playlistJson.items[i].images[0].url
+        var mood
         let insert = `
-    INSERT INTO playlists(playlist_id, playlist_owner, playlist_name, playlist_img,track_count)
-    SELECT '${id}', '${username}', '${name}', '${img}','${total}'
+    INSERT INTO playlists(playlist_id, playlist_owner, playlist_name, playlist_img)
+    SELECT '${id}', '${username}', '${name}', '${img}'
     WHERE NOT EXISTS (
         SELECT 1 FROM playlists WHERE playlist_id='${id}'
     )
 `;
+        //let insert=`insert into playlists(playlist_id,playlist_owner,playlist_name,playlist_img) values('${id}', '${username}', '${name}', '${img}') where not exists (select playlist_id from playlists where playlistid='${id}')`
         console.log("INSERTING ",insert)
         // execute the insert query here
         db.query(insert, (err, res) => {
@@ -284,6 +277,22 @@ app.get('/register', (req,res)=>{
 
 app.get('/home', (req,res)=>{
   res.render('pages/home');
+});
+
+app.get('/', (req,res)=>{
+  res.redirect('/user');
+});
+
+app.get('/user', (req,res)=>{
+  res.render('pages/user');
+});
+
+app.get('/', (req,res)=>{
+  res.redirect('/genres');
+});
+
+app.get('/genres', (req,res)=>{
+  res.render('pages/genres');
 });
 
 
@@ -764,3 +773,4 @@ app.get('/home', (req, res) => {
     res.redirect('/login');
   }
 });
+
