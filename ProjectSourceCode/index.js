@@ -427,11 +427,12 @@ app.get('/view_mood/:id', async (req, res) => {
         return { genre: genre, count: allGenres[genre] };
       });
       var mood = generateMood(genreArray);
+      mood.percentage = Math.round(mood.percentage);
       console.log(mood);
       var topGenres = genreArray.sort((a, b) => b.count - a.count).slice(0, 3);
 
       console.log("TOP GENRES", topGenres)
-          var query = `UPDATE playlists SET genre1='${topGenres[0].genre}', genre2='${topGenres[1].genre}', genre3='${topGenres[2].genre}', mood_name = '${mood.mood}' WHERE playlist_id='${pid}'`;
+          var query = `UPDATE playlists SET genre1='${topGenres[0].genre}', genre2='${topGenres[1].genre}', genre3='${topGenres[2].genre}', mood_name = '${mood.mood}', mood_percent= '${mood.percentage}' WHERE playlist_id='${pid}'`;
           db.query(query, (error, results) => {
             if (error) {
               console.error(error);
@@ -446,7 +447,7 @@ app.get('/view_mood/:id', async (req, res) => {
             averageDanceability: fetchResult.averageDanceability*100,
             averageEnergy: fetchResult.averageEnergy*100,
             averageValence: fetchResult.averageValence*100,
-            mood : mood.mood
+            mood : mood
           });
         })
       }
