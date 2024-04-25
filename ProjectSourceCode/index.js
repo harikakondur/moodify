@@ -387,10 +387,10 @@ app.get('/view_mood/:id', async (req, res) => {
   .then(async playlistResult => {
     console.log("PLAYLIST: ",playlistResult.data)
     let check = `SELECT * FROM playlists WHERE playlist_name='${playlistResult.data.name}'`;
-
+ 
     //check if mood has already been generated
     console.log("Running db.query with check:", check);
-
+ 
     db.oneOrNone(check)
     .then(async dbResult => {
       console.log("db.query result:", dbResult);
@@ -408,7 +408,7 @@ app.get('/view_mood/:id', async (req, res) => {
           playlistName: playlistResult.data.name,
           img: playlistResult.data.images[0].url,
           mood: dbResult.mood,
-          genres: genreCount
+          genres: genreCount 
         });
       } 
       // CASE 2: playlist exists but mood has NOT been generated
