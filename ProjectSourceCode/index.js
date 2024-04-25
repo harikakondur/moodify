@@ -403,13 +403,14 @@ app.get('/view_mood/:id', async (req, res) => {
           [dbResult.genre2]: 1,
           [dbResult.genre3]: 1
         };
-        res.render('pages/genres', {    
+        res.render('pages/genres', {   
+          songs: playlistResult.data,
           playlistName: playlistResult.data.name,
           img: playlistResult.data.images[0].url,
           mood: dbResult.mood,
           genres: genreCount
         });
-      }
+      } 
       // CASE 2: playlist exists but mood has NOT been generated
       else{
         console.log("hi")
@@ -436,11 +437,14 @@ app.get('/view_mood/:id', async (req, res) => {
           db.query(query, (error, results) => {
             if (error) {
               console.error(error);
-            } else {
+            } else { 
               console.log("Genres inserted successfully"); 
             }
           });
-          res.render('pages/genres', {    
+          console.log("PLAYLIST:",playlistResult)
+          //console.log(playlistResult.data.items[0].track.album.images[0].url) 
+          res.render('pages/genres', { 
+            songs: playlistResult.data,   
             genres: topGenres,
             playlistName: playlistResult.data.name,
             img: playlistResult.data.images[0].url,
