@@ -1,6 +1,7 @@
 
 
 <!-- Content for the home page -->
+
 <div class="container-fluid mt-5">
     <div class="row align-items-start">
         <!-- Profile Image and User Info Section -->
@@ -8,10 +9,12 @@
             <img src="{{profile_pic}}" class="img-fluid rounded-circle mb-2" alt="Profile Image">
             <h2 class="h5">{{usern}}</h2>
             <h3 class="h6">Followers: {{followers}}</h3>
+
         </div>
 
         <!-- Cards Section -->
         <div class="col-md-9">
+
             <div class="container-home">
                 <div class="row g-3"> <!-- g-3 for spacing between columns -->
                     {{#each playlists}}
@@ -28,6 +31,7 @@
                         </div>
                     </div>
                     {{/each}}
+
                 </div>
             </div>
         </div>

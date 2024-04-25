@@ -12,6 +12,7 @@ create table if not exists playlists(
     playlist_name varchar(50),
     playlist_img varchar(250),
     mood_name varchar(50),
+    mood_percent int,
     valence float,
     energy float,
     danceability float,
@@ -19,7 +20,14 @@ create table if not exists playlists(
     genre1 varchar(30),
     genre2 varchar(30),
     genre3 varchar(30)
+);
 
+create table if not exists dummy_playlists(
+    playlist_id varchar(50) primary key,
+    playlist_owner varchar(50),
+    playlist_name varchar(50),
+    playlist_img varchar(250),
+    mood_name varchar(50)
 );
 
 -- create table if not exists playlist_mood(
