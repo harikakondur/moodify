@@ -24,102 +24,175 @@
 
 
 <style>
-/* Ensures the image is appropriately sized and aligned */
+.container-fluid {
+    max-width: 100%; /* Ensures the container doesn't exceed the width of the viewport */
+}
+
+/* Ensuring vertical alignment of content within columns */
+.col-md-4, .col-md-8 {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Playlist box and genre/mood box alignment */
+.bg-dark {
+    padding: 20px; /* Provides sufficient padding around the content */
+    border-radius: 8px; /* Rounded corners for aesthetic appeal */
+    margin-bottom: 20px; /* Ensures consistent spacing below each box */
+    flex-grow: 1; /* Makes the boxes take up the full height of their column */
+}
+
+/* Adjust carousel dimensions to match desired aspect ratio */
+.carousel-container {
+    max-width: 100%; /* Adjust this if the carousel needs to be narrower */
+}
+
+.carousel-inner img {
+    height: auto; /* Adjust height based on width to maintain aspect ratio */
+    min-height: 300px; /* Minimum height to maintain a decent visibility at smaller widths */
+    object-fit: cover; /* Ensures images cover the area properly without stretching */
+}
+
+/* Carousel controls positioned neatly below the carousel */
+.carousel-controls {
+    position: relative; /* Relative to the carousel-container */
+    text-align: center; /* Centers the buttons */
+    padding-top: 10px; /* Space above the buttons */
+    margin-top: -40px; /* Adjust this value based on actual button size to position correctly */
+}
+
+/* Enhancing visibility and interactivity of carousel controls */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    width: 30px; /* Adjust icon size */
+    height: 30px; /* Adjust icon size */
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.carousel-control-prev, .carousel-control-next, .btn-play-pause {
+    background-color: transparent; /* Clear background */
+    border: none; /* No borders */
+}
+
+.btn-play-pause {
+    color: white; /* Button text color */
+    margin: 0 20px; /* Spacing between play/pause and directional buttons */
+}
+
+/* Adjust the progress bar height for better visual impact */
+.progress {
+    height: 20px; /* Makes the progress bar thicker */
+    background-color: #e9ecef; /* Light background color for the progress bar */
+}
+
+.progress-bar {
+    background-color: #007bff; /* Consistent with Bootstrap's primary color */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+  
+.badge {
+    padding: 0.5em 0.75em;  /* Adjust padding for larger badges */
+}
+
+.bg-dark {
+    background-color: #343a40; /* Ensures consistency in the dark background */
+}
+
+/* Optional: Add more specific styling or animations */
+.badge:hover {
+    opacity: 0.85; /* Slight transparency on hover for interactive effect */
+}
+
+
+
+
+
+
+
+.container-fluid {
+    padding-top: 50px;  /* Increased padding for more space from the navbar */
+}
+
 .img-fluid {
     max-width: 200px;  /* Adjust based on your preference */
     height: auto;
 }
 
-/* Adds some spacing and font sizing to the headers */
 h2, h4 {
     margin-bottom: 0.5rem;
+    color: white;  /* Ensuring visibility against the dark background */
 }
 
-/* Enhances the visual separation and alignment of stats */
-.bg-dark p {
+.bg-dark {
+    background-color: black; /* Setting the background for profile info box */
     text-align: center;
     margin: 0;
+    color: white;
 }
 
-.container-fluid {
-    padding-top: 20px;  /* Reduced padding to better fit content and navbar */
-    padding-bottom: 20px; /* Adds padding to the bottom for spacing within the container */
-    margin-bottom: 20px; /* Reduced margin to decrease space between this and the next container */
-    padding-left: 0;
-    padding-right: 0;
-    background-color: #daffcc; /* Light gray color */
-    min-height: auto; /* Adjust height based on content instead of viewport */
-    box-sizing: border-box; /* Ensures padding doesn't affect overall width */
+.card {
+ transition: box-shadow 0.3s ease, transform 0.3s ease;    background-color: black; /* Black background for the cards */
+    color: white; /* White text */
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 20px;
 }
+.card:hover {
+    transform: scale(1.06); /* Slightly enlarges the card on hover */
+}
+.btn-secondary:hover, .btn-primary:hover {
+    background-color: #C5EBAA; /* Bootstrap green color for hover */
+    color: white; /* Ensures text color is white for better readability */
+}
+
+
+.card img {
+    width: 100%;
+    height: auto; /* Adjust height to be auto for proper scaling */
+    object-fit: cover;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.card-title {
+    margin-bottom: 15px;
+}
+
+.btn-secondary, .btn-primary {
+    color: white;
+    background-color: #555; /* Darker button background for contrast */
+    width: 100%; /* Full width buttons */
+}
+
 
 
 body {
-    background-size: cover; /* Covers the entire area, adapting to different content heights */
-    background-attachment: fixed; /* Keeps the background fixed during scrolling */
+    background-color: white; /* Set the background of the page to white */
     color: black;
     font-family: 'Comfortaa', cursive;
-    min-height: 100vh;
     padding: 20px;
-    box-sizing: border-box;
-}
-
-.container-home {
-    max-width: 960px;
-    margin: 40px auto;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    border-radius: 8px;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Styling for cards within the container */
-.card {
-    background-color: #f8f9fa; /* Slightly off-white background for the cards */
-    border: none; /* Remove default borders */
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Subtle shadow for depth */
-    border-radius: 5px; /* Rounded corners for the cards */
-    margin-bottom: 20px; /* Space below each card */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions for transform and box shadow */
-}
-
-.card:hover {
-    transform: scale(1.05); /* Scale up the card slightly */
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2); /* Increase shadow for more depth */
-}
-
-
-/* Image aspect ratio and object fit */
-.card img {
-    width: 100%;
-    height: calc(100% * 9 / 16); /* Maintain a 16:9 aspect ratio */
-    object-fit: cover; /* Cover the frame of the container */
-}
-
-/* Adjustments to card layout and button styling */
-.card-body {
-    padding: 15px;
-    font-size: 0.9rem;
-}
-
-.row {
-    margin-right: 0;
-    margin-left: 0;
 }
 
 .row.g-3 > [class^="col-"] {
     padding: 0 15px;
 }
 
-/* Custom button styling */
-.btn {
-    font-size: 0.8rem;
-    padding: 5px 10px;
-}
-
-.btn-primary {
-    background-color: black !important; /* Custom black background */
-    color: white; /* White text */
+.d-grid {
+    display: grid;
 }
 
 
@@ -129,15 +202,8 @@ body {
 
 
 
-body {
-  background-color: #daffcc;
-  font-family: 'Comfortaa', cursive;
-}
 
-.btn-primary {
-  background-color: black !important;
-  color: white;
-}
+
 
 .container {
   display: flex;
@@ -210,15 +276,7 @@ body {
 
 
 
-.btn {
-  background-color: black;
-  color: white;
-  border: none;
-  cursor: pointer;
-  padding: 10px 15px;
-  font-size: 16px;
-  display: inline-block; 
-}
+
 
 label {
   display: block;
@@ -265,7 +323,7 @@ label {
 /* Custom button styling */
 /* General body styles */
 body {
-  background-color: #daffcc; /* Light green background for a fresh feel */
+  background-color: #C5EBAA; /* Light green background for a fresh feel */
   color: black; /* Standard text color for readability */
   font-family: 'Comfortaa', cursive; /* Comfortable and stylish font for text */
   padding: 20px; /* Padding around the content to avoid touching the edges */
@@ -347,7 +405,7 @@ img {
 }
 
 .btn:hover {
-  background-color: #333; /* Darker grey on hover for feedback */
+  background-color: darkgrey; /* Darker grey on hover for feedback */
 }
 
 /* Utility classes for text alignment */
