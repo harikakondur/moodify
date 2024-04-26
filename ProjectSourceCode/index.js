@@ -24,8 +24,8 @@ const dbConfig = {
   host: 'db',
   port: 5432,
   database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD
+  user: process.env.POSTGRES_USER,  
+  password: process.env.POSTGRES_PASSWORD 
 };
 
 
@@ -99,8 +99,15 @@ async function insertPlaylists(playlistJson,username){
     for (i=0;i<playlistCount;i++){
         var id=playlistJson.items[i].id
         var name=playlistJson.items[i].name
-        var img=playlistJson.items[i].images[0].url
+        //var img=playlistJson.items[i].images[0].url
+        
         var trackCount=playlistJson.items[i].tracks.total
+        if(playlistJson.items[i].images!=null){
+          var img=playlistJson.items[i].images[0].url
+        }
+        else{
+          var img = "/images/default_img.png"
+        }
         let insert = `
         INSERT INTO playlists(playlist_id, playlist_owner, playlist_name, playlist_img, track_count)
         SELECT '${id}', '${username}', '${name}', '${img}', ${trackCount}
@@ -108,7 +115,6 @@ async function insertPlaylists(playlistJson,username){
             SELECT 1 FROM playlists WHERE playlist_id='${id}'
         )
     `;
-        //let insert=`insert into playlists(playlist_id,playlist_owner,playlist_name,playlist_img) values('${id}', '${username}', '${name}', '${img}') where not exists (select playlist_id from playlists where playlistid='${id}')`
         console.log("INSERTING ",insert)
         // execute the insert query here
         db.query(insert, (err, res) => {
@@ -146,7 +152,9 @@ function generateMood(genreArray) {
             maxMood = mood;
         }
     }
-    let moodPercent = (maxCount/genreArray.length)*100;
+    console.log(maxCount);
+    console.log(genreArray.length);
+    let moodPercent = (maxCount / genreArray.reduce((total, item) => total + item.count, 0)) * 100;
     return {mood: maxMood, percentage : moodPercent};
 }
 
@@ -200,7 +208,6 @@ app.post('/login', async(req,res)=>{
         const password = req.body.password;
         const query= `select * from users where spotifyuser='${username}';`;
         let user= await db.any(query);
-        //console.log(user);
         if(user.length!=0){
             // check if password from request matches with password in DB
             const match = await bcrypt.compare(req.body.password, user[0].password);
@@ -271,7 +278,6 @@ app.get('/playlistsHomePage', async (req, res) => {
     console.log('success?')
     //console.log("ROWS: ",result)
 
-    //another query here
     const user = await db.query(`SELECT * FROM users WHERE spotifyuser='${usern}'`);
     const profile_pic = user[0].profile_pic;
     const followers = user[0].followers;
@@ -332,9 +338,6 @@ async function fetchMetrics(playlistJson,total){
       }
     })
     .then(audioResult => {
-      //console.log("AUDIO",audioResult.data);
-      //var dance = result.data.danceability //artist genres
-      //console.log("dance",dance) 
       totalValence += audioResult.data.valence;
       totalDanceability += audioResult.data.danceability;
       totalEnergy += audioResult.data.energy;
@@ -349,6 +352,9 @@ async function fetchMetrics(playlistJson,total){
   await Promise.all(promises);
   console.log("artist ids after fetching",artists)
   console.log("Artists: ", artists);
+  console.log("Danceability: ", totalDanceability);
+  console.log("Energy: ", totalEnergy);
+  console.log("Valence: ", totalValence);
   console.log("Average Danceability: ", totalDanceability / total);
   console.log("Average Energy: ", totalEnergy / total);
   console.log("Average Valence: ", totalValence / total);
@@ -407,7 +413,6 @@ app.get('/view_mood/:id', async (req, res) => {
     db.oneOrNone(check)
     .then(async dbResult => {
       console.log("db.query result:", dbResult);
-      // rest of your code...
        // CASE 1: playlist exists and mood had been generated already
        if(dbResult && dbResult.mood_name != null){
         console.log("Mood is not null");
@@ -529,29 +534,20 @@ app.get('/view_mood/:id', async (req, res) => {
 //       artist: track.artists[0].name,
 //     }));
 
-//     // Send the list of songs as a JSON response
-//     res.json(songs);
-//   })
-//   .catch(error => {
-//     console.error('Error:', error);
-//     res.status(500).send('An error occurred while fetching songs from Spotify.');
-//   });  
-// });
-
-
+    // Send the list of songs as a JSON response
+    res.json(songs);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    res.status(500).send('An error occurred while fetching songs from Spotify.');
+  });  
+});
 
     
 app.get('/logout',(req,res)=>{
   res.render('pages/login',{message:"Logged out Successfully."});
 });
 module.exports = app.listen(3000);
-// console.log('Listening on 3000');
-// app.listen(3000);
-
-
-
-
-
 
 
 
@@ -606,10 +602,8 @@ app.get('/spotify_auth', function(req, res) {
 
 
 app.get('/callback', function(req, res) {
-
   // your application requests refresh and access tokens
   // after checking the state parameter
-
   var code = req.query.code || null;
   var state = req.query.state || null;
   var storedState = req.cookies ? req.cookies[stateKey] : null;
@@ -711,8 +705,6 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
-
-
 // Spotify Auth for login
 
 app.get('/spotify_auth_login', function(req, res) {
@@ -788,13 +780,6 @@ app.get('/callback_login', function(req, res) {
           //res.redirect('/get_playlists',{spotifyUsername:spotifyUsername})
           console.log(body.id);
         });
-
-        // we can also pass the token to the browser to make requests from there
-        // res.redirect('/home')
-        //   console.log(querystring.stringify({
-        //     access_token: access_token,
-        //     refresh_token: refresh_token
-        //   }))
       } else {
         res.redirect('/#' +
           querystring.stringify({
@@ -837,9 +822,6 @@ app.get('/refresh_token', function(req, res) {
     }
   });
 });
-
-
-
 
 app.get('/login', (req, res) => {
   res.render('login', { isLoggedIn: false });
