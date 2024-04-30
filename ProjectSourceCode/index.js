@@ -380,7 +380,20 @@ function createGenreArray(artistsJson){
     });
     return genreCount;
 }
-
+function getMatches(mood) {
+  console.log("inside get matches")
+  let matches = `SELECT * from dummy_playlists where mood_name='${mood}';`;
+  console.log(matches)
+  try {
+    const matchResults = db.query(matches);
+    console.log("Retrieved matched");
+    console.log(matchResults)
+    return matchResults;
+  } catch (err) {
+    console.log("Matches error:", err);
+    throw err;
+  }
+}
 app.get('/view_mood/:id', async (req, res) => {
   console.log("Inside /view_mood/:id route");
   var pid = req.params.id;
@@ -401,20 +414,36 @@ app.get('/view_mood/:id', async (req, res) => {
     .then(async dbResult => {
       console.log("db.query result:", dbResult);
        // CASE 1: playlist exists and mood had been generated already
-       if(dbResult && dbResult.mood != null){
+       if(dbResult && dbResult.mood_name != null){
         console.log("Mood is not null");
         let genreCount = {
           [dbResult.genre1]: 1,
           [dbResult.genre2]: 1,
           [dbResult.genre3]: 1
         };
-        res.render('pages/genres', {   
-          songs: playlistResult.data,
-          playlistName: playlistResult.data.name,
-          img: playlistResult.data.images[0].url,
-          mood: dbResult.mood,
-          genres: genreCount 
-        });
+        console.log("GENRE COUNT",genreCount)
+        const matchResults = await getMatches(dbResult.mood_name);
+        // var g1=dbResult.genre1
+        // var g2=dbResult.genre2
+        // var g3=dbResult.genre3
+        // var genres = [g1, g2, g3];
+          // Use matchResults here
+          res.render('pages/genres', { 
+            matches:matchResults,
+            songs: playlistResult.data,
+            playlistName: playlistResult.data.name,
+            img: playlistResult.data.images[0].url,
+            mood: dbResult.mood_name,
+            mood_percent: dbResult.mood_percent,
+            genres: genreCount,
+            averageDanceability: dbResult.danceability*100,
+            averageEnergy: dbResult.energy*100,
+            averageValence: dbResult.valence*100,
+          });
+       
+          
+       
+    
       } 
       // CASE 2: playlist exists but mood has NOT been generated
       else{
@@ -436,28 +465,38 @@ app.get('/view_mood/:id', async (req, res) => {
       mood.percentage = Math.round(mood.percentage);
       console.log(mood);
       var topGenres = genreArray.sort((a, b) => b.count - a.count).slice(0, 3);
-
+      //var topGenreNames = topGenres.map(genre => genre.name);
+      //console.log("TOP",topGenreNames)
+    
       console.log("TOP GENRES", topGenres)
-          var query = `UPDATE playlists SET genre1='${topGenres[0].genre}', genre2='${topGenres[1].genre}', genre3='${topGenres[2].genre}', mood_name = '${mood.mood}', mood_percent= '${mood.percentage}' WHERE playlist_id='${pid}'`;
-          db.query(query, (error, results) => {
+      var query = `UPDATE playlists SET genre1='${topGenres[0].genre}', genre2='${topGenres[1].genre}', genre3='${topGenres[2].genre}', mood_name = '${mood.mood}', mood_percent= '${mood.percentage}', valence='${fetchResult.averageValence}', danceability='${fetchResult.averageDanceability}', energy='${fetchResult.averageEnergy}' WHERE playlist_id='${pid}'`;          db.query(query, async(error, results) => {
             if (error) {
               console.error(error);
-            } else { 
+            } else {  
               console.log("Genres inserted successfully"); 
-            }
+            } 
           });
-          console.log("PLAYLIST:",playlistResult)
+          console.log("PLAYLIST:",playlistResult.data)
+          const matchResults =  getMatches(mood.mood);
+          
+            // Use matchResults here
+            res.render('pages/genres', { 
+              matches: matchResults,
+              songs: playlistResult.data,   
+              genres: topGenres,
+              playlistName: playlistResult.data.name,
+              img: playlistResult.data.images[0].url,
+              averageDanceability: fetchResult.averageDanceability*100,
+              averageEnergy: fetchResult.averageEnergy*100,
+              averageValence: fetchResult.averageValence*100,
+              mood : mood.mood,
+              mood_percent: mood.percentage
+            });
+         
+            
+          
           //console.log(playlistResult.data.items[0].track.album.images[0].url) 
-          res.render('pages/genres', { 
-            songs: playlistResult.data,   
-            genres: topGenres,
-            playlistName: playlistResult.data.name,
-            img: playlistResult.data.images[0].url,
-            averageDanceability: fetchResult.averageDanceability*100,
-            averageEnergy: fetchResult.averageEnergy*100,
-            averageValence: fetchResult.averageValence*100,
-            mood : mood
-          });
+          
         })
       }
     })
@@ -467,33 +506,33 @@ app.get('/view_mood/:id', async (req, res) => {
   })
   .catch(err=>{
     console.log("Fetching playlist error",err)
-  })
+  }) 
 });
 
-app.get('/suggestions', (req, res) => {
-  const averageValence = req.query.averageValence;
-  const averageEnergy = req.query.averageEnergy;
-  const averageDanceability = req.query.averageDanceability;
-  const genres = req.query.genres;
+// app.get('/suggestions', (req, res) => {
+//   const averageValence = req.query.averageValence;
+//   const averageEnergy = req.query.averageEnergy;
+//   const averageDanceability = req.query.averageDanceability; 
+//   const genres = req.query.genres;
 
-  // Use the query parameters to make a request to the Spotify API
-  axios.get('https://api.spotify.com/v1/recommendations', {
-    params: {
-      seed_genres: genres,
-      target_danceability: averageDanceability,
-      target_energy: averageEnergy,
-      target_valence: averageValence,
-    },
-    headers: {
-      Authorization: 'Bearer ' + tokens.access, 
-    },
-  })
-  .then(response => {
-    // Extract the songs from the Spotify API response
-    const songs = response.data.tracks.map(track => ({
-      name: track.name,
-      artist: track.artists[0].name,
-    }));
+//   // Use the query parameters to make a request to the Spotify API 
+//   axios.get('https://api.spotify.com/v1/recommendations', {
+//     params: {
+//       seed_genres: genres,
+//       target_danceability: averageDanceability,
+//       target_energy: averageEnergy,
+//       target_valence: averageValence,
+//     },
+//     headers: {
+//       Authorization: 'Bearer ' + tokens.access, 
+//     },
+//   })
+//   .then(response => {
+//     // Extract the songs from the Spotify API response
+//     const songs = response.data.tracks.map(track => ({
+//       name: track.name,
+//       artist: track.artists[0].name,
+//     }));
 
     // Send the list of songs as a JSON response
     res.json(songs);

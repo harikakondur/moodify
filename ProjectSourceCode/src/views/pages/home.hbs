@@ -1,39 +1,38 @@
 
-
+{{>navbar isLoggedIn=true}}
 <!-- Content for the home page -->
-
+<!-- Profile Image and User Info Section -->
 <div class="container-fluid mt-5">
-    <div class="row align-items-start">
-        <!-- Profile Image and User Info Section -->
-        <div class="col-md-3 text-center p-3 bg-dark rounded">
+    <div class="row">
+        <div class="col-md-6 text-center p-3 bg rounded">
             <img src="{{profile_pic}}" class="img-fluid rounded-circle mb-2" alt="Profile Image">
-            <h2 class="h5">{{usern}}</h2>
-            <h3 class="h6">Followers: {{followers}}</h3>
-
         </div>
+        <div class="col-md-6">
+            <h2 class="h2">{{usern}}</h2>
+            <h3 class="h6">Followers: {{followers}}</h3>
+        </div>
+    </div>
+    
+</div>
 
-        <!-- Cards Section -->
-        <div class="col-md-9">
+{{!-- <h2 style="text-align: center; color: black; font-weight: bold; margin-top: 20px;">Playlists</h2> --}}
 
-            <div class="container-home">
-                <div class="row g-3"> <!-- g-3 for spacing between columns -->
-                    {{#each playlists}}
-                    <div class="col-md-4">
-                        <div class="card h-100 bg-dark text-white"> <!-- h-100 for equal height cards -->
-                            <div class="card-body">
-                                <h5 class="card-title">{{this.playlist_name}}</h5>
-                                <img src="{{this.playlist_img}}" class="card-img" alt="Playlist Image">
-                                <div class="d-grid gap-2">
-                                    <a href="/view_mood/{{this.playlist_id}}" class="btn btn-secondary ">View Mood</a>
-                                    <a href="/find_matches/{{this.playlist_id}}" class="btn btn-secondary ">Find Matches -></a>
-                                </div>
-                            </div>
-                        </div>
+<div class="container py-3 px-3 shadow-none" style="background-color: #C5EBAA;">
+    <h2 class="text-center mt-5 mb-5 text-black">Playlists</h2>
+<div class="row row-cols-3 g-5">
+        {{#each playlists}}
+        <div class="col-md-4">
+            <div class="card h-100 text-white bg"> <!-- h-100 for equal height cards -->
+                <div class="card-body">
+                    <h5 class="card-title">{{this.playlist_name}}</h5>
+                    <img src="{{this.playlist_img}}" class="card-img" alt="Playlist Image">
+                    <div class="d-grid gap-2">
+                        <a href="/view_mood/{{this.playlist_id}}" class="btn btn-secondary ">View Mood</a>
+                        {{!-- <a href="/find_matches/{{this.playlist_id}}" class="btn btn-secondary ">Find Matches -></a> --}}
                     </div>
-                    {{/each}}
-
                 </div>
             </div>
         </div>
+        {{/each}}
     </div>
 </div>
